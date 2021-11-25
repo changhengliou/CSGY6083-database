@@ -1,0 +1,17 @@
+$theme-colors: (
+  // "primary": #0074d9,
+  // "secondary": #2ecc71,
+  // "success": #2ecc71,
+  // "danger": #ff4136,
+  // "warning": #ff9800,
+  // "info": #C4E1EA,
+  "light": #f1f1f1,
+  "khaki": #9C9788,
+  "indigo": #627DA0,
+  "purple": #7271B1,
+  "dark": #26234F,
+);
+
+@import "~bootstrap/scss/bootstrap.scss";
+
+@import "./Layout/layout.scss";
