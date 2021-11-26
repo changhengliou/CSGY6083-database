@@ -9,9 +9,9 @@ $theme-colors: (
   "khaki": #9C9788,
   "indigo": #627DA0,
   "purple": #7271B1,
-  "dark": #26234F,
+  "dark": #11172b,
 );
 
 @import "~bootstrap/scss/bootstrap.scss";
 
-@import "./Layout/layout.scss";
+@import "./layout/layout.scss";

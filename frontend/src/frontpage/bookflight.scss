@@ -1,0 +1,132 @@
+$select-focus-color: #fff;
+$select-border-color: #9c9788;
+$select-font-color: #fff;
+$select-font-weight: 300;
+$select-red: #df1e33;
+$background-image:  url("https://cdn.pixabay.com/photo/2016/10/24/22/43/dubai-1767540_1280.jpg");
+
+i.dest-arrow > svg {
+  width: 1.8rem;
+  color: $select-red;
+}
+
+.airport-selector {
+  &-hint {
+    font-size: 0.7rem;
+  }
+
+  &-display {
+    cursor: pointer;
+  }
+}
+
+.DateInput.DateInput_1 {
+  color: $select-font-color;
+  background-color: transparent;
+}
+
+input.DateInput_input.DateInput_input_1 {
+  padding: 4px;
+}
+
+.SingleDatePickerInput.SingleDatePickerInput_1.SingleDatePickerInput__withBorder.SingleDatePickerInput__withBorder_2 {
+  border: 0;
+  background-color: transparent;
+
+  input {
+    font-size: 1rem;
+    font-weight: $select-font-weight;
+    color: $select-font-color;
+    border-bottom: 1px solid $select-border-color;
+    background-color: transparent;
+  }
+  
+  .DateInput_input__focused {
+    border-bottom: 2px solid $select-focus-color;
+
+    & input {
+      border-bottom: 1px solid $select-border-color;
+    }
+  }
+}
+
+.flight-select {
+  width: 100%;
+  max-width: 850px;
+
+  padding: 1rem 3rem;
+
+  @media screen and (max-width: 768px) {
+    padding: 0.6rem 1rem;    
+  }
+
+  select.form-select {
+    display: inline-block;
+    width: auto;
+    height: 33px;
+    min-width: 10rem;
+    color: $select-font-color;
+    font-weight: $select-font-weight;
+    padding: 0px 4px 4px 4px;
+    margin-left: 1rem;
+    vertical-align: baseline;
+    border: 0px;
+    border-bottom: 1px solid $select-border-color;
+    border-radius: 0;
+    background-color: transparent;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+      border-bottom: 2px solid $select-focus-color;
+    }
+
+    & > option {
+      color: #2c2c2c;
+      font-weight: $select-font-weight;
+    }
+  }
+
+  .submit-btn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background-color: $select-red;
+    cursor: pointer;
+    
+    &:active {
+      background-color: #be0a1f;
+      outline: none;
+      box-shadow: none;
+    }
+
+    > svg {
+      width: 1rem;
+      color: #fff;
+    }
+
+    @media screen and (max-width: 768px) {
+      margin: 0 auto;
+      margin-top: 1rem;
+    }  
+  }
+}
+
+.bg-img {
+  height: calc(100vh - 180px);
+  background-image: $background-image;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: top;
+}
+
+.bg-text {
+  top: 1rem; 
+  left: 1rem;
+
+  @media screen and (max-width: 768px) {
+    text-align: center;
+  }    
+}

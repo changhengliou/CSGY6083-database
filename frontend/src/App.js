@@ -1,10 +1,22 @@
-import { Header } from './Layout/index';
-import { BrowserRouter } from 'react-router-dom';
+import { Header } from './layout/index';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import routes from './layout/route';
 
-function App() {
+const App = () => {
   return (
     <BrowserRouter>
       <Header />
+      <Routes>
+        { 
+          routes.map((route, index) => (
+            <Route
+              key={`${route.route}_${index}`}
+              path={route.route}
+              element={route.element}
+            />
+          )) 
+        }
+      </Routes>
     </BrowserRouter>
   );
 }
