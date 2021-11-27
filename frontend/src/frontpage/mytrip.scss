@@ -1,0 +1,59 @@
+$background-image: url("https://images.pexels.com/photos/2610763/pexels-photo-2610763.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500");
+$select-red: #df1e33;
+
+.bg-trip-img {
+  height: calc(100vh - 180px);
+  background-image: $background-image;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+}
+
+.submit-btn {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background-color: $select-red;
+  cursor: pointer;
+  
+  &:active {
+    background-color: #be0a1f;
+    outline: none;
+    box-shadow: none;
+  }
+
+  > svg {
+    width: 1rem;
+    color: #fff;
+  }
+
+  @media screen and (max-width: 768px) {
+    margin: 0 auto;
+    margin-top: 1rem;
+  }  
+}
+
+.search-bar-hint {
+  font-size: 0.8rem;
+  padding-left: 0.4rem;
+}
+
+.form-input {
+  border: none;
+  border-bottom: 1px solid #ccc;
+  background: transparent;
+  color: #fff;
+  padding: 0.3rem 0.5rem;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+    border-bottom: 2px solid #fff;
+  }
+
+  &::placeholder {
+    color: #fff;
+  }
+}

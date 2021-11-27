@@ -13,7 +13,17 @@ const App = () => {
               key={`${route.route}_${index}`}
               path={route.route}
               element={route.element}
-            />
+            >
+              {
+                (route.children || []).map((route, index) => (
+                  <Route
+                    key={`${route.route}_${index}`}
+                    path={route.route}
+                    element={route.element}
+                  />
+                ))
+              }
+            </Route>
           )) 
         }
       </Routes>

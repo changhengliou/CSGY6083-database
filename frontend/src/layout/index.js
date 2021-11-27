@@ -27,8 +27,8 @@ export const Header = () => {
             { renderLink(routes) }
           </Nav>
           <Nav>
-            <Link to="/user/login" className="text-light fs-6 d-flex align-items-center nav-link">
-              <span className="me-2">LOGIN</span> <SigninSvg />
+            <Link to="/admin" className="text-light fs-6 d-flex align-items-center nav-link">
+              <span className="me-2">DASHBOARD</span> <SigninSvg />
             </Link>
           </Nav>
         </Navbar.Collapse>
