@@ -3,6 +3,7 @@ $select-border-color: #9c9788;
 $select-font-color: #fff;
 $select-font-weight: 300;
 $select-red: #df1e33;
+$select-dark: #11172b;
 $background-image:  url("https://cdn.pixabay.com/photo/2016/10/24/22/43/dubai-1767540_1280.jpg");
 
 i.dest-arrow > svg {
@@ -129,4 +130,36 @@ input.DateInput_input.DateInput_input_1 {
   @media screen and (max-width: 768px) {
     text-align: center;
   }    
+}
+
+
+div.select-search:hover {
+  border-color: $select-dark;
+}
+
+.select-search__option.is-selected {
+  background-color: $select-dark;
+  color: #fff;
+
+  &:hover {
+    background-color: $select-dark; 
+    opacity: 0.8;
+  }
+}
+
+.select-search__option.is-highlighted,
+.select-search__option:not(.is-selected):hover {
+  background-color: $select-dark;
+  opacity: 0.6;
+  color: #fff;
+}
+
+.select-search__option.is-highlighted.is-selected,
+.select-search__option.is-selected:hover {
+  background-color: $select-dark;
+  color: #fff;
+}
+
+.select-search:not(.select-search--multiple) .select-search__input:hover {
+  border-color: $select-dark;
 }

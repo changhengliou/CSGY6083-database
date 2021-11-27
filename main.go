@@ -1,6 +1,7 @@
 package main
 
 import (
+	"app/api"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -11,13 +12,10 @@ func main() {
 
 	// some middleware
 	// r.Use(gin.Logger())
-	api := r.Group("/api/")
+	apiController := r.Group("/api/")
 	{
-		api.GET("/user", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"message": "Hello World",
-			})
-		})
+		apiController.GET("/airport", api.GetAirportList)
+		apiController.GET("/flight-search", api.GetAvailableFlights)
 	}
 
 	if err := r.Run(); err != nil {

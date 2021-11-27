@@ -1,0 +1,45 @@
+$link-color: #4470c3;
+
+.card-icon > svg {
+  width: 1.2rem;
+}
+
+.card-search-info {
+  font-size: 0.8rem;
+}
+
+@media screen and (max-width: 768px) {
+  .flight-info-card {
+    width: 100%;
+  }
+}
+
+.card-hint {
+  display: block;
+  padding-bottom: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.card-price {
+  cursor: pointer;
+  &.price-eco:hover {
+    background-image: linear-gradient(to bottom right, rgb(2, 2, 226), rgb(73, 90, 241));
+    color: #fff;
+  }
+
+  &.price-biz:hover {
+    background-image: linear-gradient(to bottom right, rgb(47, 47, 245), rgb(120, 131, 230));
+    color: #fff;
+  }
+
+  &.price-first:hover {
+    background-image: linear-gradient(to bottom right, rgb(173, 52, 4), rgb(241, 135, 73));
+    color: #fff;
+  }
+}
+
+.text-blue {
+  color: $link-color;
+  cursor: pointer;
+}

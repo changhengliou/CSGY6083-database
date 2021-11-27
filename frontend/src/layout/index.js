@@ -4,7 +4,7 @@ import routes from './route';
 import { ReactComponent as SigninSvg } from '../icons/signin.svg';
 
 const renderLink = (routes) => {
-  return routes.map((el, index) => {
+  return routes.filter(el => el.header).map((el, index) => {
     return (
       <Link
         key={`${el.route}_${index}`}
