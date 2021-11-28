@@ -1,10 +1,4 @@
-$theme-colors: (
-  // "primary": #0074d9,
-  // "secondary": #2ecc71,
-  // "success": #2ecc71,
-  // "danger": #ff4136,
-  // "warning": #ff9800,
-  // "info": #C4E1EA,
+$extra-colors: (
   "light": #f1f1f1,
   "khaki": #9C9788,
   "indigo": #627DA0,
@@ -15,3 +9,5 @@ $theme-colors: (
 @import "~bootstrap/scss/bootstrap.scss";
 
 @import "./layout/layout.scss";
+
+$theme-colors: map-merge($map1: $theme-colors, $map2: $extra-colors);

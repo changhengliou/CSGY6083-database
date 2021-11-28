@@ -18,7 +18,7 @@ const Admin = () => {
           }
         </ul>
       </div>
-      <div className="col-auto">
+      <div className="col-8 col-sm-9 col-lg-10">
         <Outlet />
       </div>
     </div>

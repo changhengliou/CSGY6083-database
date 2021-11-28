@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -60,4 +61,62 @@ func GetAirportList() []*model.Airport {
 
 func GetAvailableFlights() {
 
+}
+
+func GetAirlineList() []*model.Airline {
+	var airlineList []*model.Airline
+	if err := db.Select(&airlineList, "SELECT * FROM airline"); err != nil {
+		log.Fatalln(err)
+	}
+	return airlineList
+}
+
+func GetFlightList() []*model.Flight {
+	const QUERY = `SELECT 
+			f.flight_id,
+			f.departure_airport,
+			f.arrival_airport,
+			f.departure_time,
+			f.arrival_time, 
+			a.airline_id "airline.airline_id",
+			a.name "airline.name", 
+			a.main_hub "airline.main_hub", 
+			a.headquarter_city "airline.headquarter_city", 
+			a.country "airline.country"
+		FROM flight AS f
+		INNER JOIN airline AS a ON f.airline_id = a.airline_id;`
+	var flightList []*model.Flight
+	if err := db.Select(&flightList, QUERY); err != nil {
+		log.Fatalln(err)
+	}
+	return flightList
+}
+
+func CreateFlight(flight *model.Flight) error {
+	log.Println(time.Time(*flight.DepartureTime), time.Time(*flight.ArrivalTime).Format("15:04:05"))
+	const QUERY = `INSERT INTO flight (
+		flight_id,
+		departure_airport,
+		arrival_airport,
+		departure_time,
+		arrival_time,
+		airline_id
+	) VALUES (
+		:flight_id,
+		:departure_airport,
+		:arrival_airport,
+		:departure_time,
+		:arrival_time,
+		:airline_id
+	)`
+
+	_, err := db.NamedExec(QUERY, map[string]interface{}{
+		"flight_id":         flight.FlightId,
+		"departure_airport": flight.DepartureAirport,
+		"arrival_airport":   flight.ArrivalAirport,
+		"departure_time":    time.Time(*flight.DepartureTime).Format("15:04:05"),
+		"arrival_time":      time.Time(*flight.ArrivalTime).Format("15:04:05"),
+		"airline_id":        flight.Airline.AirlineId,
+	})
+	return err
 }

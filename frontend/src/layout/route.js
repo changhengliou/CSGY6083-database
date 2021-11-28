@@ -8,6 +8,9 @@ const FlightSearchResult = lazy(() => import('../frontpage/FlightSearchResult'))
 const MyTrip = lazy(() => import('../frontpage/MyTrip'));
 const FlightStatus = lazy(() => import('../frontpage/FlightStatus'));
 const Admin = lazy(() => import('../frontpage/Admin'));
+const Airline = lazy(() => import('../frontpage/Airline'));
+const Flight = lazy(() => import('../frontpage/Flight'));
+const Airport = lazy(() => import('../frontpage/Airport'));
 
 const routes = [
   {
@@ -65,9 +68,33 @@ const routes = [
       </Suspense>
     ),
     children: [
-      { route: '/admin/airline', label: 'Airline', element: <div>Airline</div> },
-      { route: '/admin/flight', label: 'Flight', element: <div>Flight</div> },
-      { route: '/admin/airport', label: 'Airport', element: <div>Airport</div> },
+      { 
+        route: '/admin/airline', 
+        label: 'Airline', 
+        element: (
+          <Suspense fallback={<>...</>}>
+            <Airline />
+          </Suspense>
+        ) 
+      },
+      { 
+        route: '/admin/airport', 
+        label: 'Airport', 
+        element: (
+          <Suspense fallback={<>...</>}>
+            <Airport />
+          </Suspense>
+        ) 
+      },
+      { 
+        route: '/admin/flight', 
+        label: 'Flight', 
+        element: (
+          <Suspense fallback={<>...</>}>
+            <Flight />
+          </Suspense>
+        )
+      },
       { route: '/admin/customer', label: 'Customer', element: <div>Customer</div> }
     ]
   }
