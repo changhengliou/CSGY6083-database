@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -59,8 +58,49 @@ func GetAirportList() []*model.Airport {
 	return airportList
 }
 
-func GetAvailableFlights() {
+func GetAvailableFlights(from, to string, stops int) [][]*model.Flight {
+	var flightList []*model.Flight
+	if err := db.Select(&flightList, "SELECT flight_id, departure_airport, arrival_airport, departure_time, arrival_time FROM flight"); err != nil {
+		log.Fatalln(err)
+	}
+	// build graph
+	flightGraph := make(map[string][]*model.Flight)
+	q := make([][]*model.Flight, 0)
+	for _, flight := range flightList {
+		if _, ok := flightGraph[flight.DepartureAirport]; !ok {
+			flightGraph[flight.DepartureAirport] = make([]*model.Flight, 0)
+		}
 
+		flightGraph[flight.DepartureAirport] = append(flightGraph[flight.ArrivalAirport], flight)
+		if flight.DepartureAirport == from {
+			q = append(q, []*model.Flight{flight})
+		}
+	}
+	// find all paths
+	ans := make([][]*model.Flight, 0)
+	step := 0
+	for len(q) > 0 {
+		for i := 0; i < len(q); i++ {
+			curr := q[0]
+			q = q[1:]
+			if curr[len(curr)-1].ArrivalAirport == to {
+				ans = append(ans, curr)
+				continue
+			}
+			for _, flight := range flightGraph[curr[len(curr)-1].ArrivalAirport] {
+				// TODO: add flag to stop search long hours transfer at airport
+				// if flight.DepartureTime.Time().Before(*curr[len(curr)-1].ArrivalTime.Time()) {
+				// 	continue
+				// }
+				q = append(q, append(curr, flight))
+			}
+		}
+		step++
+		if step > stops {
+			break
+		}
+	}
+	return ans
 }
 
 func GetAirlineList() []*model.Airline {
@@ -93,7 +133,6 @@ func GetFlightList() []*model.Flight {
 }
 
 func CreateFlight(flight *model.Flight) error {
-	log.Println(time.Time(*flight.DepartureTime), time.Time(*flight.ArrivalTime).Format("15:04:05"))
 	const QUERY = `INSERT INTO flight (
 		flight_id,
 		departure_airport,
@@ -114,8 +153,8 @@ func CreateFlight(flight *model.Flight) error {
 		"flight_id":         flight.FlightId,
 		"departure_airport": flight.DepartureAirport,
 		"arrival_airport":   flight.ArrivalAirport,
-		"departure_time":    time.Time(*flight.DepartureTime).Format("15:04:05"),
-		"arrival_time":      time.Time(*flight.ArrivalTime).Format("15:04:05"),
+		"departure_time":    flight.DepartureTime.Time().Format("15:04:05"),
+		"arrival_time":      flight.ArrivalTime.Time().Format("15:04:05"),
 		"airline_id":        flight.Airline.AirlineId,
 	})
 	return err

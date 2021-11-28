@@ -54,18 +54,18 @@ const Airline = (props) => {
   const [airports, setAirports] = useState([]);
 
   const getFlights = useCallback(async () => {
-    const flights = await fetch("/api/flight").then(r => r.json());
+    const flights = (await fetch("/api/flight").then(r => r.json())) || [];
     flights.forEach(flight => {
       flight.airlineName = flight.airline?.name;
     });
     setTableData(flights);
   }, [setTableData]);
   const getAirlines = useCallback(async () => {
-    const airlines = await fetch("/api/airline").then(r => r.json());
+    const airlines = (await fetch("/api/airline").then(r => r.json())) || [];
     setAirlines(airlines);
   }, [setAirlines]);
   const getAirports = useCallback(async () => {
-    const airports = await fetch("/api/airport").then(r => r.json());
+    const airports = (await fetch("/api/airport").then(r => r.json())) || [];
     setAirports(airports);
   }, [setAirports]);
 

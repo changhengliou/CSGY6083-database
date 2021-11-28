@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import moment from 'moment';
 import { Form, Modal } from 'react-bootstrap';
 import 'react-dates/initialize';
@@ -12,7 +12,6 @@ import "./bookflight.scss";
 
 const AirportSelector = (props) => {
   const [show, setShow] = useState(false);
-  const [selected, setSelected] = useState(null);
 
   return (
     <>
@@ -21,7 +20,7 @@ const AirportSelector = (props) => {
         onClick={() => setShow(true)}
       >
         <div className="airport-selector-display fs-1 m-auto">
-          { selected || props.default }
+          { props.selected || props.default }
         </div>
         <small className="airport-selector-hint m-auto">{props.hint}</small>
       </div>
@@ -34,12 +33,12 @@ const AirportSelector = (props) => {
         <Modal.Body>
           <SelectSearch
             options={props.options || []}
-            value={selected}
+            value={props.selected}
             search
             filterOptions={fuzzySearch}
             placeholder="Search for an airport"
             onChange={(s) => {
-              setSelected(s);
+              props.onChange(s);
               setShow(false);
             }}
           />
@@ -53,6 +52,9 @@ const BookFlight = () => {
   const [focused, setFocused] = useState(false);
   const [date, setDate] = useState(moment());
   const [options, setOptions] = useState([]);
+  const [departure, setDeparture] = useState('');
+  const [arrival, setArrival] = useState('');
+  const passengerSelect = useRef(null);
   const navigate = useNavigate();
   const getAirports = useCallback(async () => {
     const airports = await fetch("/api/airport").then(r => r.json());
@@ -73,11 +75,23 @@ const BookFlight = () => {
     <div className="bg-dark text-light">
       <div className="flight-select row pt-3 pb-4 mx-auto">
         <div className="col-md-6 d-flex justify-content-center align-items-center">
-          <AirportSelector default="FROM" hint="Your Origin" options={options}/>
+          <AirportSelector
+            default="FROM"
+            hint="Your Origin"
+            options={options}
+            selected={departure}
+            onChange={setDeparture}
+          />
           <i className="dest-arrow mx-5">
             <ArrowSvg />
           </i>
-          <AirportSelector default="TO" hint="Your Destination" options={options}/>
+          <AirportSelector
+            default="TO"
+            hint="Your Destination"
+            options={options}
+            selected={arrival}
+            onChange={setArrival}
+          />
         </div>
         <div className="col-md-5 d-flex justify-content-center align-items-center">
           <SingleDatePicker
@@ -87,7 +101,10 @@ const BookFlight = () => {
             onDateChange={setDate}
             numberOfMonths={1}
           />
-          <Form.Select aria-label="Number of passenger"> 
+          <Form.Select
+            aria-label="Number of passenger"
+            ref={passengerSelect}
+          >
             {
               [1,2,3,4,5,6,7,8,9].map(i => (
                 <option
@@ -103,7 +120,11 @@ const BookFlight = () => {
         <div className="col-md-1 d-flex align-items-center">
           <button
             className="submit-btn d-flex justify-content-center align-items-center"
-            onClick={() => { navigate("/flight-search/result"); }}
+            onClick={() => {
+              const passenger = passengerSelect.current.value;
+              const url = `/flight-search/result?dep=${departure}&arr=${arrival}&stops=3&date=${date.format("YYYY-MM-DD")}&numOfPassenger=${passenger}`;
+              navigate(url);
+            }}
           >
             <ArrowSvg />
           </button>

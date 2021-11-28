@@ -31,6 +31,11 @@ func (mt *timeOnly) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+func (mt *timeOnly) Time() *time.Time {
+	c := time.Time(*mt)
+	return &c
+}
+
 type Airport struct {
 	Code    string `json:"code"`
 	City    string `json:"city"`
@@ -54,4 +59,10 @@ type Flight struct {
 	DepartureTime    *timeOnly `json:"departureTime" db:"departure_time"`
 	ArrivalTime      *timeOnly `json:"arrivalTime" db:"arrival_time"`
 	Airline          *Airline  `json:"airline" db:"airline"`
+}
+
+type FlightSearchReq struct {
+	Departure string `form:"dep" json:"departure" binding:"required,len=3"`
+	Arrival   string `form:"arr" json:"arrival" binding:"required,len=3"`
+	Stops     int    `form:"stops" json:"stops" binding:"max=5"`
 }

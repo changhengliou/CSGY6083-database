@@ -17,7 +17,8 @@ func main() {
 	{
 		apiController.GET("/airport", api.GetAirportList)
 		apiController.GET("/airline", api.GetAirlineList)
-		apiController.Any("/flight", api.FlightController)
+		apiController.GET("/flight", api.FlightController)
+		apiController.POST("/flight", api.FlightController)
 		apiController.GET("/flight-search", api.GetAvailableFlights)
 	}
 
