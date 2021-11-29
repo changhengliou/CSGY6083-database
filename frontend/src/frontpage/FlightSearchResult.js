@@ -14,9 +14,15 @@ const FlightDetails = ({ flight }) => {
         flight.map((f, idx) => {
           const from = moment(f.departureTime, "HH:mm");
           const to = moment(f.arrivalTime, "HH:mm");
-          const diff = moment.duration(to.diff(from));
-          const diffHours = parseInt(diff.asHours());
-          const diffMins = parseInt(diff.asMinutes()) - diffHours * 60;
+          let diff;
+          if (to.isAfter(from)) {
+            diff = to.subtract(from.hours(), 'hours').subtract(from.minutes(), 'minutes');
+          } else {
+            const d = moment("00:00", "HH:mm").subtract(from.hours(), 'hours').subtract(from.minutes(), 'minutes');
+            diff = to.add(d.hours(), 'hours').add(d.minutes(), 'minutes');
+          }
+          const diffHours = diff.hours();
+          const diffMins = diff.minutes();
           if (idx > 0 && from.isBefore(moment(flight[idx - 1].arrivalTime, "HH:mm"))) {
             date.add(1, 'days');
           }
@@ -84,8 +90,8 @@ const FlightSearchRow = ({ flight = [] }) => {
   if (flight.length === 0)
     return null;
 
-  const fromT = moment(flight[0].departureTime, "HH:mm");
-  const toT = moment(flight[flight.length - 1].arrivalTime, "HH:mm");
+  const from = moment(flight[0].departureTime, "HH:mm");
+  const to = moment(flight[flight.length - 1].arrivalTime, "HH:mm");
   let dayOffset = 0;
   flight.reduce((a, b) => {
     const _b = moment(b.departureTime, "HH:mm");
@@ -93,9 +99,15 @@ const FlightSearchRow = ({ flight = [] }) => {
     dayOffset += _b.isBefore(_a);
     return b;
   });
-  const duration = moment.duration(toT.add(dayOffset, 'days').diff(fromT));
-  const diffHours = parseInt(duration.asHours());
-  const diffMins = parseInt(duration.asMinutes()) - diffHours * 60;
+  let diff;
+  if (to.isAfter(from)) {
+    diff = to.subtract(from.hours(), 'hours').subtract(from.minutes(), 'minutes');
+  } else {
+    const d = moment("00:00", "HH:mm").subtract(from.hours(), 'hours').subtract(from.minutes(), 'minutes');
+    diff = to.add(d.hours(), 'hours').add(d.minutes(), 'minutes');
+  }
+  const diffHours = diff.hours() + dayOffset * 24;
+  const diffMins = diff.minutes();
   const svgXPos = ['5'];
   const airports = flight.map(f => f.departureAirport);
   airports.push(flight[flight.length - 1].arrivalAirport);
@@ -126,11 +138,19 @@ const FlightSearchRow = ({ flight = [] }) => {
             </span>
           </div>
           <div className="d-flex justify-content-between align-items-center">
-            <h2 className="fw-light">4:45pm</h2>
+            <h2 className="fw-light">
+              {
+                moment(flight[0].departureTime, "HH:mm").format("H:mmA")
+              }
+            </h2>
             <i className="card-icon">
               <AirplaneSvg />
             </i>
-            <h2 className="fw-light">12:45am</h2>
+            <h2 className="fw-light">
+              {
+                moment(flight[flight.length - 1].arrivalTime, "HH:mm").format("H:mmA")
+              }
+            </h2>
           </div>
           <svg height="30" width="100%">
             <rect x="10px" y="4" width="95%" height="0.7" />

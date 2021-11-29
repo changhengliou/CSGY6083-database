@@ -58,6 +58,25 @@ func GetAirportList() []*model.Airport {
 	return airportList
 }
 
+func getRouteHelper(from, to string, stops int, curr *model.Flight, currRoute []*model.Flight, routes *[][]*model.Flight, visited map[string]bool, flightGraph *map[string][]*model.Flight) {
+	currRoute = append(currRoute, curr)
+	visited[curr.DepartureAirport] = true
+	if to == curr.ArrivalAirport {
+		*routes = append(*routes, currRoute)
+		return
+	}
+	if stops <= 1 {
+		return
+	}
+	for _, next := range (*flightGraph)[curr.ArrivalAirport] {
+		if _, ok := visited[next.ArrivalAirport]; !ok {
+			visited[next.ArrivalAirport] = true
+			getRouteHelper(from, to, stops-1, next, currRoute, routes, visited, flightGraph)
+			visited[next.ArrivalAirport] = false
+		}
+	}
+}
+
 func GetAvailableFlights(from, to string, stops int) [][]*model.Flight {
 	var flightList []*model.Flight
 	if err := db.Select(&flightList, "SELECT flight_id, departure_airport, arrival_airport, departure_time, arrival_time FROM flight"); err != nil {
@@ -65,40 +84,24 @@ func GetAvailableFlights(from, to string, stops int) [][]*model.Flight {
 	}
 	// build graph
 	flightGraph := make(map[string][]*model.Flight)
-	q := make([][]*model.Flight, 0)
+	startingRoutes := make([]*model.Flight, 0)
 	for _, flight := range flightList {
 		if _, ok := flightGraph[flight.DepartureAirport]; !ok {
 			flightGraph[flight.DepartureAirport] = make([]*model.Flight, 0)
 		}
 
-		flightGraph[flight.DepartureAirport] = append(flightGraph[flight.ArrivalAirport], flight)
+		flightGraph[flight.DepartureAirport] = append(flightGraph[flight.DepartureAirport], flight)
 		if flight.DepartureAirport == from {
-			q = append(q, []*model.Flight{flight})
+			startingRoutes = append(startingRoutes, flight)
 		}
 	}
+
 	// find all paths
 	ans := make([][]*model.Flight, 0)
-	step := 0
-	for len(q) > 0 {
-		for i := 0; i < len(q); i++ {
-			curr := q[0]
-			q = q[1:]
-			if curr[len(curr)-1].ArrivalAirport == to {
-				ans = append(ans, curr)
-				continue
-			}
-			for _, flight := range flightGraph[curr[len(curr)-1].ArrivalAirport] {
-				// TODO: add flag to stop search long hours transfer at airport
-				// if flight.DepartureTime.Time().Before(*curr[len(curr)-1].ArrivalTime.Time()) {
-				// 	continue
-				// }
-				q = append(q, append(curr, flight))
-			}
-		}
-		step++
-		if step > stops {
-			break
-		}
+	for _, fromFlight := range startingRoutes {
+		visited := make(map[string]bool)
+		visited[from] = true
+		getRouteHelper(from, to, stops, fromFlight, []*model.Flight{}, &ans, visited, &flightGraph)
 	}
 	return ans
 }

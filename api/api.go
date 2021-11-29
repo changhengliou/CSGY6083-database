@@ -19,7 +19,6 @@ func GetAvailableFlights(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	log.Println(req)
 	c.JSON(http.StatusOK, service.GetAvailableFlights(req.Departure, req.Arrival, req.Stops))
 }
 

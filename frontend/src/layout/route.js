@@ -3,6 +3,7 @@ import { ReactComponent as DepartureSvg } from '../icons/departure.svg';
 import { ReactComponent as SuitcaseSvg } from '../icons/suitcase.svg';
 import { ReactComponent as ClipboardSvg } from '../icons/clipboard.svg';
 import { ReactComponent as UserGroupSvg } from '../icons/user-group.svg';
+import Loading from '../icons/loading';
 const BookFlight = lazy(() => import('../frontpage/BookFlight'));
 const FlightSearchResult = lazy(() => import('../frontpage/FlightSearchResult'));
 const MyTrip = lazy(() => import('../frontpage/MyTrip'));
@@ -20,7 +21,7 @@ const routes = [
     label: 'BOOK',
     icon: <DepartureSvg />,
     element: (
-      <Suspense fallback={<>...</>}>
+      <Suspense fallback={<Loading/>}>
         <BookFlight />
       </Suspense>
     ),
@@ -32,7 +33,7 @@ const routes = [
     icon: <SuitcaseSvg />,
     header: true,
     element: (
-      <Suspense fallback={<>...</>}>
+      <Suspense fallback={<Loading/>}>
         <MyTrip />
       </Suspense>
     )
@@ -43,7 +44,7 @@ const routes = [
     icon: <ClipboardSvg />,
     header: true,
     element: (
-      <Suspense fallback={<>...</>}>
+      <Suspense fallback={<Loading/>}>
         <FlightStatus />
       </Suspense>
     )
@@ -57,7 +58,7 @@ const routes = [
   {
     route: '/flight-search/result',
     element: (
-      <Suspense fallback={<>...</>}>
+      <Suspense fallback={<Loading/>}>
         <FlightSearchResult />
       </Suspense>
     )
@@ -65,7 +66,7 @@ const routes = [
   {
     route: '/trip-summary',
     element: (
-      <Suspense fallback={<>...</>}>
+      <Suspense fallback={<Loading/>}>
         <TripSummary />
       </Suspense>
     )
@@ -73,7 +74,7 @@ const routes = [
   {
     route: '/admin',
     element: (
-      <Suspense fallback={<>...</>}>
+      <Suspense fallback={<Loading/>}>
         <Admin />
       </Suspense>
     ),
@@ -82,7 +83,7 @@ const routes = [
         route: '/admin/airline', 
         label: 'Airline', 
         element: (
-          <Suspense fallback={<>...</>}>
+          <Suspense fallback={<Loading/>}>
             <Airline />
           </Suspense>
         ) 
@@ -91,7 +92,7 @@ const routes = [
         route: '/admin/airport', 
         label: 'Airport', 
         element: (
-          <Suspense fallback={<>...</>}>
+          <Suspense fallback={<Loading/>}>
             <Airport />
           </Suspense>
         ) 
@@ -100,7 +101,7 @@ const routes = [
         route: '/admin/flight', 
         label: 'Flight', 
         element: (
-          <Suspense fallback={<>...</>}>
+          <Suspense fallback={<Loading/>}>
             <Flight />
           </Suspense>
         )
@@ -109,7 +110,7 @@ const routes = [
         route: '/admin/insurance', 
         label: 'Insurance Plan', 
         element: (
-          <Suspense fallback={<>...</>}>
+          <Suspense fallback={<Loading/>}>
             <InsurancePlan />
           </Suspense>
         )
