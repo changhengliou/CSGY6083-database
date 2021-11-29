@@ -11,6 +11,8 @@ const Admin = lazy(() => import('../frontpage/Admin'));
 const Airline = lazy(() => import('../frontpage/Airline'));
 const Flight = lazy(() => import('../frontpage/Flight'));
 const Airport = lazy(() => import('../frontpage/Airport'));
+const TripSummary = lazy(() => import('../frontpage/TripSummary'));
+const InsurancePlan = lazy(() => import('../frontpage/InsurancePlan'));
 
 const routes = [
   {
@@ -61,6 +63,14 @@ const routes = [
     )
   },
   {
+    route: '/trip-summary',
+    element: (
+      <Suspense fallback={<>...</>}>
+        <TripSummary />
+      </Suspense>
+    )
+  },
+  {
     route: '/admin',
     element: (
       <Suspense fallback={<>...</>}>
@@ -92,6 +102,15 @@ const routes = [
         element: (
           <Suspense fallback={<>...</>}>
             <Flight />
+          </Suspense>
+        )
+      },
+      { 
+        route: '/admin/insurance', 
+        label: 'Insurance Plan', 
+        element: (
+          <Suspense fallback={<>...</>}>
+            <InsurancePlan />
           </Suspense>
         )
       },

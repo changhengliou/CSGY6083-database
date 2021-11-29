@@ -132,7 +132,7 @@ const Airline = (props) => {
             <Form.Select
               required
               type="text"
-              className="form-select form-select-sm mb-3"
+              className="form-select form-select-sm"
               name="arrivalAirport"
             >
               {
@@ -143,16 +143,22 @@ const Airline = (props) => {
                 ))
               }
             </Form.Select>
+            <label style={{fontSize: '0.8rem'}}>
+              Departure Time
+            </label>
             <Form.Control
               required
-              type="text"
-              className="form-control form-control-sm mb-3"
+              type="time"
+              className="form-control form-control-sm"
               placeholder="Departure Time (Ex: 13:45)"
               name="departureTime"
             />
+            <label style={{fontSize: '0.8rem'}}>
+              Arrival Time
+            </label>
             <Form.Control
               required
-              type="text"
+              type="time"
               className="form-control form-control-sm mb-3"
               placeholder="Arrival Time (Ex: 22:30)"
               name="arrivalTime"

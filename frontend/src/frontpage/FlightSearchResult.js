@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import moment from 'moment';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ReactComponent as AirplaneSvg } from "../icons/airplane.svg";
 import "./flightsearchresult.scss";
 
@@ -11,12 +11,15 @@ const FlightDetails = ({ flight }) => {
   return (
     <>
       {
-        flight.map(f => {
+        flight.map((f, idx) => {
           const from = moment(f.departureTime, "HH:mm");
           const to = moment(f.arrivalTime, "HH:mm");
           const diff = moment.duration(to.diff(from));
           const diffHours = parseInt(diff.asHours());
           const diffMins = parseInt(diff.asMinutes()) - diffHours * 60;
+          if (idx > 0 && from.isBefore(moment(flight[idx - 1].arrivalTime, "HH:mm"))) {
+            date.add(1, 'days');
+          }
           return (
             <div key={f.flightId} className="card mb-3">
               <div className="card-body text-indigo">
@@ -77,6 +80,7 @@ const FlightDetails = ({ flight }) => {
 
 const FlightSearchRow = ({ flight = [] }) => {
   const [show, setShow] = useState(false);
+  const navigate = useNavigate();
   if (flight.length === 0)
     return null;
 
@@ -153,13 +157,22 @@ const FlightSearchRow = ({ flight = [] }) => {
         </div>
       </div>
       { /* card ends here */ }
-      <div className="card card-price price-eco col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center">
+      <div
+        className="card card-price price-eco col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center"
+        onClick={() => navigate('/trip-summary')}
+      >
         $1,781
       </div>
-      <div className="card card-price price-biz col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center">
+      <div
+        className="card card-price price-biz col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center"
+        onClick={() => navigate('/trip-summary')}
+      >
         $2,077
       </div>
-      <div className="card card-price price-first col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center">
+      <div
+        className="card card-price price-first col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center"
+        onClick={() => navigate('/trip-summary')}
+      >
         $3,365
       </div>
       <Modal
@@ -193,35 +206,44 @@ const FlightSearchResult = () => {
   const displayDate = moment(searchDate, "YYYY-MM-DD").format("ddd, MMM DD, YYYY");
   return (
     <div className="p-3">
-      <div className="d-flex">
-        <div className="col-md-6">
-          <h4>
-            { displayDate }
-          </h4>
-          <small className="card-hint">
-            Price includes taxes and fees. 
-            <span className="text-blue fw-bold"> Baggage fee </span> 
-            may apply. Services and amenities may
-            <span className="text-blue fw-bold"> vary or change.</span>
-          </small>
-        </div>
-        <div className="col-md-2 d-none d-sm-none d-md-flex align-items-center justify-content-center text-center">
-          Economy
-        </div>
-        <div className="col-md-2 d-none d-sm-none d-md-flex align-items-center justify-content-center text-center">
-          Business
-        </div>
-        <div className="col-md-2 d-none d-sm-none d-md-flex align-items-center justify-content-center text-center">
-          First
-        </div>
-      </div>
-      {
-        flights.map((flight, i) => (
-          <FlightSearchRow
-            key={`${i}_${Math.random().toString(36).substr(4)}`}
-            flight={flight}
-          />
-        ))
+      { flights.length ? (
+          <>
+            <div className="d-flex">
+              <div className="col-md-6">
+                <h4>
+                  { displayDate }
+                </h4>
+                <small className="card-hint">
+                  Price includes taxes and fees. 
+                  <span className="text-blue fw-bold"> Baggage fee </span> 
+                  may apply. Services and amenities may
+                  <span className="text-blue fw-bold"> vary or change.</span>
+                </small>
+              </div>
+              <div className="col-md-2 d-none d-sm-none d-md-flex align-items-center justify-content-center text-center">
+                Economy
+              </div>
+              <div className="col-md-2 d-none d-sm-none d-md-flex align-items-center justify-content-center text-center">
+                Business
+              </div>
+              <div className="col-md-2 d-none d-sm-none d-md-flex align-items-center justify-content-center text-center">
+                First
+              </div>
+            </div>
+            {
+              flights.map((flight, i) => (
+                <FlightSearchRow
+                  key={`${i}_${Math.random().toString(36).substr(4)}`}
+                  flight={flight}
+                />
+              ))
+            }
+          </>
+        ) : (
+          <div>
+            We are not able to find any flight from {searchParams.get('dep')} to {searchParams.get('arr')}.
+          </div>
+        )
       }
     </div>
   );
