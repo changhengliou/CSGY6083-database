@@ -15,10 +15,21 @@ func main() {
 	r.Use(gin.Recovery())
 	apiController := r.Group("/api/")
 	{
-		apiController.GET("/airport", api.GetAirportList)
-		apiController.GET("/airline", api.GetAirlineList)
+		apiController.GET("/airport", api.AirportController)
+		apiController.POST("/airport", api.AirportController)
+		apiController.PUT("/airport", api.AirportController)
+		apiController.DELETE("/airport", api.AirportController)
+
+		apiController.GET("/airline", api.AirlineController)
+		apiController.POST("/airline", api.AirlineController)
+		apiController.PUT("/airline", api.AirlineController)
+		apiController.DELETE("/airline", api.AirlineController)
+
 		apiController.GET("/flight", api.FlightController)
 		apiController.POST("/flight", api.FlightController)
+		apiController.PUT("/flight", api.FlightController)
+		apiController.DELETE("/flight", api.FlightController)
+
 		apiController.GET("/flight-search", api.GetAvailableFlights)
 	}
 

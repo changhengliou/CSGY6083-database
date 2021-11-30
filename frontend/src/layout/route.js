@@ -14,6 +14,8 @@ const Flight = lazy(() => import('../frontpage/Flight'));
 const Airport = lazy(() => import('../frontpage/Airport'));
 const TripSummary = lazy(() => import('../frontpage/TripSummary'));
 const InsurancePlan = lazy(() => import('../frontpage/InsurancePlan'));
+const MealPlan = lazy(() => import('../frontpage/MealPlan'));
+const Customer = lazy(() => import('../frontpage/Customer'));
 
 const routes = [
   {
@@ -80,6 +82,15 @@ const routes = [
     ),
     children: [
       { 
+        route: '/admin/customer', 
+        label: 'Customer', 
+        element: (
+          <Suspense fallback={<Loading/>}>
+            <Customer />
+          </Suspense>
+        )
+      },
+      { 
         route: '/admin/airline', 
         label: 'Airline', 
         element: (
@@ -115,7 +126,15 @@ const routes = [
           </Suspense>
         )
       },
-      { route: '/admin/customer', label: 'Customer', element: <div>Customer</div> }
+      { 
+        route: '/admin/meal', 
+        label: 'Meal Plan', 
+        element: (
+          <Suspense fallback={<Loading/>}>
+            <MealPlan />
+          </Suspense>
+        )
+      },
     ]
   }
 ];

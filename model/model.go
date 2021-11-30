@@ -37,19 +37,19 @@ func (mt *timeOnly) Time() *time.Time {
 }
 
 type Airport struct {
-	Code    string `json:"code"`
-	City    string `json:"city"`
-	Country string `json:"country"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
+	Code    string `json:"code" binding:"required"`
+	City    string `json:"city" binding:"required"`
+	Country string `json:"country" binding:"required"`
+	Name    string `json:"name" binding:"required"`
+	Type    string `json:"type" binding:"required"`
 }
 
 type Airline struct {
 	AirlineId   int    `json:"airlineId" db:"airline_id"`
-	Name        string `json:"name"`
-	MainHub     string `json:"mainHub" db:"main_hub"`
-	HeadQuarter string `json:"headQuarter" db:"headquarter_city"`
-	Country     string `json:"country"`
+	Name        string `json:"name" binding:"required"`
+	MainHub     string `json:"mainHub" db:"main_hub" binding:"required"`
+	HeadQuarter string `json:"headQuarter" db:"headquarter_city" binding:"required"`
+	Country     string `json:"country" binding:"required"`
 }
 
 type Flight struct {
@@ -58,7 +58,7 @@ type Flight struct {
 	ArrivalAirport   string    `json:"arrivalAirport" db:"arrival_airport"`
 	DepartureTime    *timeOnly `json:"departureTime" db:"departure_time"`
 	ArrivalTime      *timeOnly `json:"arrivalTime" db:"arrival_time"`
-	Airline          *Airline  `json:"airline" db:"airline"`
+	Airline          *Airline  `json:"airline" db:"airline" binding:"-"`
 }
 
 type FlightSearchReq struct {

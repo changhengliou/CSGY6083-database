@@ -303,13 +303,13 @@ const TripSummary = props => {
                     <label style={{fontSize: '0.8rem'}}>
                       Special request
                     </label>
-                    <Form.Select
+                    <Form.Control
                       required
-                      className="form-select form-select-sm"
+                      type="text"
+                      className="form-control form-control-sm"
                       name="specialRequest"
-                    >
-                      <option value="">No special request</option>
-                    </Form.Select>
+                      placeholder="Anything we should know..."
+                    />
                   </div>
                 </div>
               </Form.Group>

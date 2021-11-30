@@ -57,7 +57,7 @@ const BookFlight = () => {
   const passengerSelect = useRef(null);
   const navigate = useNavigate();
   const getAirports = useCallback(async () => {
-    const airports = await fetch("/api/airport").then(r => r.json());
+    const airports = (await fetch("/api/airport").then(r => r.json())) || [];
     const airportOptions = airports.map(el => {
       return {
         value: el.code,

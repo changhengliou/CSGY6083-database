@@ -58,6 +58,58 @@ func GetAirportList() []*model.Airport {
 	return airportList
 }
 
+func CreateAirport(airport *model.Airport) error {
+	const QUERY = `INSERT INTO airport (
+		code,
+		name,
+		city,
+		country,
+		type
+	) VALUES (
+		:code,
+		:name,
+		:city,
+		:country,
+		:type
+	)`
+
+	_, err := db.NamedExec(QUERY, map[string]interface{}{
+		"code":    airport.Code,
+		"name":    airport.Name,
+		"city":    airport.City,
+		"country": airport.Country,
+		"type":    airport.Type,
+	})
+	return err
+}
+
+func UpdateAirportById(airport *model.Airport) (int, error) {
+	const QUERY = `UPDATE airport SET 
+			name = :name,
+			city = :city,
+			country = :country,
+			type = :type
+		WHERE code = :code`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"code":    airport.Code,
+		"name":    airport.Name,
+		"city":    airport.City,
+		"country": airport.Country,
+		"type":    airport.Type,
+	})
+	rows, _ := r.RowsAffected()
+	return int(rows), err
+}
+
+func DeleteAirportById(code string) (int, error) {
+	const QUERY = `DELETE FROM airport WHERE code = :code`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"code": code,
+	})
+	rows, _ := r.RowsAffected()
+	return int(rows), err
+}
+
 func getRouteHelper(from, to string, stops int, curr *model.Flight, currRoute []*model.Flight, routes *[][]*model.Flight, visited map[string]bool, flightGraph *map[string][]*model.Flight) {
 	currRoute = append(currRoute, curr)
 	visited[curr.DepartureAirport] = true
@@ -135,6 +187,58 @@ func GetFlightList() []*model.Flight {
 	return flightList
 }
 
+func CreateAirline(airline *model.Airline) error {
+	const QUERY = `INSERT INTO airline (
+		airline_id,
+		name,
+		main_hub,
+		headquarter_city,
+		country
+	) VALUES (
+		:airline_id,
+		:name,
+		:main_hub,
+		:headquarter_city,
+		:country
+	)`
+
+	_, err := db.NamedExec(QUERY, map[string]interface{}{
+		"airline_id":       airline.AirlineId,
+		"name":             airline.Name,
+		"main_hub":         airline.MainHub,
+		"headquarter_city": airline.HeadQuarter,
+		"country":          airline.Country,
+	})
+	return err
+}
+
+func UpdateAirlineById(airline *model.Airline) (int, error) {
+	const QUERY = `UPDATE airline SET 
+		name = :name,
+		main_hub = :main_hub,
+		headquarter_city = :headquarter_city,
+		country = :country
+	WHERE airline_id = :airline_id`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"airline_id":       airline.AirlineId,
+		"name":             airline.Name,
+		"main_hub":         airline.MainHub,
+		"headquarter_city": airline.HeadQuarter,
+		"country":          airline.Country,
+	})
+	rows, _ := r.RowsAffected()
+	return int(rows), err
+}
+
+func DeleteAirlineById(airlineId string) (int, error) {
+	const QUERY = `DELETE FROM airline WHERE airline_id = :airline_id`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"airline_id": airlineId,
+	})
+	cnt, _ := r.RowsAffected()
+	return int(cnt), err
+}
+
 func CreateFlight(flight *model.Flight) error {
 	const QUERY = `INSERT INTO flight (
 		flight_id,
@@ -161,4 +265,34 @@ func CreateFlight(flight *model.Flight) error {
 		"airline_id":        flight.Airline.AirlineId,
 	})
 	return err
+}
+
+func UpdateFlightById(flight *model.Flight) (int, error) {
+	const QUERY = `UPDATE flight SET 
+		departure_airport = :departure_airport,
+		arrival_airport = :arrival_airport,
+		departure_time = :departure_time,
+		arrival_time = :arrival_time,
+		airline_id = :airline_id
+	WHERE flight_id = :flight_id`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"flight_id":         flight.FlightId,
+		"departure_airport": flight.DepartureAirport,
+		"arrival_airport":   flight.ArrivalAirport,
+		"departure_time":    flight.DepartureTime.Time().Format("15:04:05"),
+		"arrival_time":      flight.ArrivalTime.Time().Format("15:04:05"),
+		"airline_id":        flight.Airline.AirlineId,
+	})
+	log.Println(err)
+	rows, _ := r.RowsAffected()
+	return int(rows), err
+}
+
+func DeleteFlightById(flightId string) (int, error) {
+	const QUERY = `DELETE FROM flight WHERE flight_id = :flight_id`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"flight_id": flightId,
+	})
+	cnt, _ := r.RowsAffected()
+	return int(cnt), err
 }
