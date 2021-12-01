@@ -31,6 +31,14 @@ func main() {
 		apiController.DELETE("/flight", api.FlightController)
 
 		apiController.GET("/flight-search", api.GetAvailableFlights)
+
+		apiController.GET("/insurance-plan", api.InsurancePlanController)
+		apiController.POST("/insurance-plan", api.InsurancePlanController)
+		apiController.PUT("/insurance-plan", api.InsurancePlanController)
+		apiController.DELETE("/insurance-plan", api.InsurancePlanController)
+
+		apiController.GET("/meal-plan", api.MealPlanController)
+		apiController.GET("/special-request", api.SpecialRequestController)
 	}
 
 	if err := r.Run(); err != nil {

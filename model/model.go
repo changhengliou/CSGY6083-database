@@ -66,3 +66,10 @@ type FlightSearchReq struct {
 	Arrival   string `form:"arr" json:"arrival" binding:"required,len=3"`
 	Stops     int    `form:"stops" json:"stops" binding:"max=5"`
 }
+
+type InsurancePlan struct {
+	PlanId           string  `json:"planId" db:"plan_id"`
+	Name             string  `json:"name" db:"name" binding:"required"`
+	Description      string  `json:"description" db:"description" binding:"required"`
+	CostPerPassenger float64 `json:"costPerPassenger" db:"cost_per_passenger" binding:"required"`
+}

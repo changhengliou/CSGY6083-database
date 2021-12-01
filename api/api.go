@@ -141,3 +141,48 @@ func AirportController(c *gin.Context) {
 		}
 	}
 }
+
+func InsurancePlanController(c *gin.Context) {
+	if c.Request.Method == http.MethodGet {
+		c.JSON(http.StatusOK, service.GetAirportList())
+	} else if c.Request.Method == http.MethodPost {
+
+	} else if c.Request.Method == http.MethodPut {
+
+	} else if c.Request.Method == http.MethodDelete {
+
+	}
+}
+
+func MealPlanController(c *gin.Context) {
+	c.JSON(http.StatusOK, []struct {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}{
+		{"AVML", "Indian Vegetarian Meal"},
+		{"HNML", "Non-vegetarian Hindu Meal"},
+		{"VJML", "Vegetarian Jain Meal"},
+		{"KSML", "Kosher Meal"},
+		{"BLML", "Bland Meal"},
+		{"DBML", "Diabetic Meal"},
+		{"GFML", "Gluten‑Friendly Meal"},
+		{"LFML", "Low‑Fat Meal"},
+		{"LSML", "Low‑Salt Meal"},
+		{"VGML", "Vegan Meal"},
+		{"CHML", "Child Meal"},
+		{"BBML", "Baby Meal"},
+	})
+}
+
+func SpecialRequestController(c *gin.Context) {
+	c.JSON(http.StatusOK, []struct {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}{
+		{"0", "Disability and Mobility Assistance"},
+		{"1", "Travelling with infants"},
+		{"2", "Travelling with animals"},
+		{"3", "Elderly passenger"},
+		{"4", "Medical assistance"},
+	})
+}

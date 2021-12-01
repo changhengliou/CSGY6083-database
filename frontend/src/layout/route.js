@@ -126,15 +126,15 @@ const routes = [
           </Suspense>
         )
       },
-      { 
-        route: '/admin/meal', 
-        label: 'Meal Plan', 
-        element: (
-          <Suspense fallback={<Loading/>}>
-            <MealPlan />
-          </Suspense>
-        )
-      },
+      // { 
+      //   route: '/admin/meal', 
+      //   label: 'Meal Plan', 
+      //   element: (
+      //     <Suspense fallback={<Loading/>}>
+      //       <MealPlan />
+      //     </Suspense>
+      //   )
+      // },
     ]
   }
 ];

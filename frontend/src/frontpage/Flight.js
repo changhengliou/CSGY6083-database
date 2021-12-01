@@ -3,6 +3,7 @@ import moment from 'moment';
 import { Form } from 'react-bootstrap';
 import Table from "./Table";
 import "./admin.scss";
+
 const Airline = (props) => {
   const [tableData, setTableData] = useState([]);
   const [validated, setValidated] = useState(false);

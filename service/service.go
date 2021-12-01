@@ -296,3 +296,9 @@ func DeleteFlightById(flightId string) (int, error) {
 	cnt, _ := r.RowsAffected()
 	return int(cnt), err
 }
+
+func GetInsurancePlan() ([]*model.InsurancePlan, error) {
+	arr := make([]*model.InsurancePlan, 0)
+	err := db.Select(&arr, "SELECT * FROM insurance_plan;")
+	return arr, err
+}

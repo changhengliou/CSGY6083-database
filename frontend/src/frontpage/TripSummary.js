@@ -1,7 +1,25 @@
+import { useState, useCallback, useEffect } from 'react';
 import { Form } from 'react-bootstrap';
 import "./flightsearchresult.scss";
 
 const TripSummary = props => {
+  const [mealPlans, setMealPlans] = useState([]);
+  const [specialRequests, setSpecialRequests] = useState([]);
+
+  const getMealPlans = useCallback(async () => {
+    const plans = await fetch("/api/meal-plan").then(r => r.json());
+    setMealPlans(plans || []);
+  }, [setMealPlans]);
+  const getSpecialRequests = useCallback(async () => {
+    const requests = await fetch("/api/special-request").then(r => r.json());
+    setSpecialRequests(requests || []);
+  }, [setSpecialRequests]);
+
+  useEffect(() => {
+    getMealPlans();
+    getSpecialRequests();
+  }, [getMealPlans, getSpecialRequests]);
+  
   return (
     <div className="p-4 text-indigo">
       <div className="row mb-3">
@@ -295,6 +313,11 @@ const TripSummary = props => {
                       name="mealPlan"
                     >
                       <option value="">I don't want any meal</option>
+                      {
+                        mealPlans.map(el => (
+                          <option key={el.id} value={el.id}>{ el.name }</option>
+                        ))
+                      }
                     </Form.Select>
                   </div>
                 </div>
@@ -303,13 +326,18 @@ const TripSummary = props => {
                     <label style={{fontSize: '0.8rem'}}>
                       Special request
                     </label>
-                    <Form.Control
+                    <Form.Select
                       required
-                      type="text"
-                      className="form-control form-control-sm"
-                      name="specialRequest"
-                      placeholder="Anything we should know..."
-                    />
+                      className="form-select form-select-sm"
+                      name="mealPlan"
+                    >
+                      <option value="">I don't need any special request</option>
+                      {
+                        specialRequests.map(el => (
+                          <option key={el.id} value={el.id}>{ el.name }</option>
+                        ))
+                      }
+                    </Form.Select>
                   </div>
                 </div>
               </Form.Group>
