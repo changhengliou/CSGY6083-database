@@ -68,8 +68,41 @@ type FlightSearchReq struct {
 }
 
 type InsurancePlan struct {
-	PlanId           string  `json:"planId" db:"plan_id"`
+	PlanId           int     `json:"planId" db:"plan_id"`
 	Name             string  `json:"name" db:"name" binding:"required"`
 	Description      string  `json:"description" db:"description" binding:"required"`
 	CostPerPassenger float64 `json:"costPerPassenger" db:"cost_per_passenger" binding:"required"`
+}
+
+type Member struct {
+	MemberId            int        `json:"memberId" db:"member_id"`
+	MembershipName      string     `json:"membershipName" db:"membership_name" binding:"required"`
+	MembershipStartDate *time.Time `json:"membershipStartDate" db:"membership_start_date" binding:"required"`
+	MembershipEndDate   *time.Time `json:"membershipEndDate" db:"membership_end_date" binding:"required"`
+	Airline             *Airline   `json:"airline" db:"airline" binding:"-"`
+}
+
+type Invoice struct {
+	InvoiceNumber int        `json:"invoiceNumber" db:"invoice_number"`
+	Date          *time.Time `json:"date" db:"invoice_date"`
+	Amount        float64    `json:"amount" db:"amount"`
+	Customer      *Customer  `json:"customer" db:"customer" binding:"-"`
+}
+
+type Customer struct {
+	CustomerId                  int            `json:"customerId" db:"customer_id"`
+	Street                      string         `json:"street" binding:"required"`
+	City                        string         `json:"city" binding:"required"`
+	Country                     string         `json:"country" binding:"required"`
+	Zipcode                     string         `json:"zipcode" binding:"required"`
+	Phone                       int            `json:"phone" binding:"required"`
+	PhoneCountryCode            int            `json:"phoneCountryCode" db:"phone_country_code" binding:"required"`
+	EmergencyContactFirstName   string         `json:"emergencyContactFirstName" db:"emer_contact_fname" binding:"required"`
+	EmergencyContactLastName    string         `json:"emergencyContactLastName" db:"emer_contact_lname" binding:"required"`
+	EmergencyContactPhone       int            `json:"emergencyContactPhone" db:"emer_contact_phone" binding:"required"`
+	EmergencyContactCountryCode int            `json:"emergencyContactCountryCode" db:"emer_contact_country_code" binding:"required"`
+	Type                        byte           `json:"type" db:"type" binding:"required"`
+	InsurancePlan               *InsurancePlan `json:"insurancePlan" db:"insurance_plan" binding:"-"`
+	Invoice                     *Invoice       `json:"invoice" db:"invoice" binding:"-"`
+	Member                      *Member        `json:"member" db:"member" binding:"-"`
 }

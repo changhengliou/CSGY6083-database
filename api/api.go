@@ -144,13 +144,42 @@ func AirportController(c *gin.Context) {
 
 func InsurancePlanController(c *gin.Context) {
 	if c.Request.Method == http.MethodGet {
-		c.JSON(http.StatusOK, service.GetAirportList())
+		plans, _ := service.GetInsurancePlan()
+		c.JSON(http.StatusOK, plans)
 	} else if c.Request.Method == http.MethodPost {
-
+		plan := model.InsurancePlan{}
+		if err := c.BindJSON(&plan); err != nil {
+			log.Println(err)
+			return
+		}
+		plan.PlanId = rand.Intn(MAX_ID-MIN_ID) + MIN_ID
+		if err := service.CreateInsurancePlan(&plan); err != nil {
+			c.JSON(http.StatusBadRequest, err)
+		} else {
+			c.JSON(http.StatusOK, plan)
+		}
 	} else if c.Request.Method == http.MethodPut {
-
+		plan := model.InsurancePlan{}
+		if err := c.BindJSON(&plan); err != nil {
+			log.Println(err)
+			return
+		}
+		if rows, err := service.UpdateInsurancePlanById(&plan); rows != 1 || err != nil {
+			c.JSON(http.StatusBadRequest, err)
+		} else {
+			c.JSON(http.StatusOK, gin.H{"status": "success"})
+		}
 	} else if c.Request.Method == http.MethodDelete {
-
+		planId := c.Query("planId")
+		if len(planId) == 0 {
+			c.JSON(http.StatusBadRequest, "planId is required")
+			return
+		}
+		if cnt, err := service.DeleteInsurancePlanById(planId); cnt != 1 || err != nil {
+			c.JSON(http.StatusBadRequest, err)
+		} else {
+			c.JSON(http.StatusOK, gin.H{"status": "success"})
+		}
 	}
 }
 

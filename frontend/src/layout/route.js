@@ -51,12 +51,12 @@ const routes = [
       </Suspense>
     )
   },
-  {
-    route: '/member',
-    label: 'MEMBERSHIP',
-    icon: <UserGroupSvg />,
-    header: true
-  },
+  // {
+  //   route: '/member',
+  //   label: 'MEMBERSHIP',
+  //   icon: <UserGroupSvg />,
+  //   header: true
+  // },
   {
     route: '/flight-search/result',
     element: (

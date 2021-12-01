@@ -302,3 +302,52 @@ func GetInsurancePlan() ([]*model.InsurancePlan, error) {
 	err := db.Select(&arr, "SELECT * FROM insurance_plan;")
 	return arr, err
 }
+
+func CreateInsurancePlan(plan *model.InsurancePlan) error {
+	const QUERY = `INSERT INTO insurance_plan (
+		plan_id,
+		name,
+		description,
+		cost_per_passenger
+	) VALUES (
+		:plan_id,
+		:name,
+		:description,
+		:cost_per_passenger
+	)`
+	_, err := db.NamedExec(QUERY, map[string]interface{}{
+		"plan_id":            plan.PlanId,
+		"name":               plan.Name,
+		"description":        plan.Description,
+		"cost_per_passenger": plan.CostPerPassenger,
+	})
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+func UpdateInsurancePlanById(plan *model.InsurancePlan) (int, error) {
+	const QUERY = `UPDATE insurance_plan SET 
+		name = :name,
+		description = :description,
+		cost_per_passenger = :cost_per_passenger
+	WHERE plan_id = :plan_id`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"plan_id":            plan.PlanId,
+		"name":               plan.Name,
+		"description":        plan.Description,
+		"cost_per_passenger": plan.CostPerPassenger,
+	})
+	rows, _ := r.RowsAffected()
+	return int(rows), err
+}
+
+func DeleteInsurancePlanById(planId string) (int, error) {
+	const QUERY = `DELETE FROM insurance_plan WHERE plan_id = :plan_id`
+	r, err := db.NamedExec(QUERY, map[string]interface{}{
+		"plan_id": planId,
+	})
+	cnt, _ := r.RowsAffected()
+	return int(cnt), err
+}

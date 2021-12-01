@@ -1,10 +1,17 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Form } from 'react-bootstrap';
+import moment from 'moment';
 import "./flightsearchresult.scss";
 
 const TripSummary = props => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [trip, setTrip] = useState(null);
+  const [searchDate, setSearchDate] = useState(null);
+  const [duration, setDuration] = useState(null);
   const [mealPlans, setMealPlans] = useState([]);
   const [specialRequests, setSpecialRequests] = useState([]);
+  const [insurancePlan, setInsurancePlan] = useState([]);
 
   const getMealPlans = useCallback(async () => {
     const plans = await fetch("/api/meal-plan").then(r => r.json());
@@ -14,13 +21,30 @@ const TripSummary = props => {
     const requests = await fetch("/api/special-request").then(r => r.json());
     setSpecialRequests(requests || []);
   }, [setSpecialRequests]);
+  const getInsurancePlan = useCallback(async () => {
+    const plans = await fetch("/api/insurance-plan").then(r => r.json());
+    setInsurancePlan(plans || []);
+  }, [setInsurancePlan]);
 
   useEffect(() => {
     getMealPlans();
     getSpecialRequests();
-  }, [getMealPlans, getSpecialRequests]);
-  
-  return (
+    getInsurancePlan();
+  }, [getMealPlans, getSpecialRequests, getInsurancePlan]);
+
+  useEffect(() => {
+    const sessionId = searchParams.get("session");
+    const itinerary = JSON.parse(sessionStorage.getItem(sessionId));
+    setTrip(itinerary.flight);
+    setSearchDate(itinerary.date);
+    setDuration(itinerary.duration);
+  }, [searchParams, setTrip, setSearchDate, setDuration])
+
+  const stops = trip && trip.length > 0 ? `${trip[0].departureAirport} - ${trip.map(el => el.arrivalAirport).join(' - ')}` : '';
+  const flights = trip && trip.length > 0 ? trip.map(el => el.flightId).join(', ') : '';
+  const displayDate = moment(searchDate, "YYYY-MM-DD").format("ddd, MMM DD, YYYY");
+
+  return trip ? (
     <div className="p-4 text-indigo">
       <div className="row mb-3">
         <div className="col-12 col-md-8">
@@ -39,7 +63,13 @@ const TripSummary = props => {
             </div>
           </div>
           <div className="card card-body mt-3">
-            TPE - LAX Mon, Dec 15, 2022
+            <div className="row justify-content-start align-items-baseline">
+              <div className="col-8">
+                { `${stops}, ` }
+                <span style={{ fontSize: '0.8rem' }}>{ `${flights} (${duration})` }</span>
+              </div>
+              <div className="col-4">{ displayDate }</div>
+            </div>
           </div>
         </div>
         {/* total amount */}
@@ -300,7 +330,12 @@ const TripSummary = props => {
                       className="form-select form-select-sm"
                       name="insurance"
                     >
-                      <option value="">I don't want an insurance</option>
+                      <option value="">I don't need an insurance</option>
+                      {
+                        insurancePlan.map(el => (
+                          <option key={el.planId} value={el.planId}>{el.name}</option>
+                        ))
+                      }
                     </Form.Select>
                   </div>
                   <div className="col-6">
@@ -345,6 +380,11 @@ const TripSummary = props => {
           </div>
         </div>
       </div>
+    </div>
+  ) : (
+    <div className="d-flex justify-content-center align-items-center flex-column" style={{ height: 'calc(100vh - 81px)' }}>
+      <div className="fs-2">We cound not find your search</div>
+      <div className="fs-4">Please try again</div>
     </div>
   );
 };

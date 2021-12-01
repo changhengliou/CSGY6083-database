@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import moment from 'moment';
 import { Form } from 'react-bootstrap';
 import Table from "./Table";
 import "./admin.scss";
@@ -7,49 +6,31 @@ import "./admin.scss";
 const InsurancePlan = (props) => {
   const [tableData, setTableData] = useState([]);
   const [validated, setValidated] = useState(false);
-  const [airlines, setAirlines] = useState([]);
-  const [airports, setAirports] = useState([]);
   const [updateForm, setUpdateForm] = useState(null);
 
-  const getFlights = useCallback(async () => {
-    const flights = (await fetch("/api/flight").then(r => r.json())) || [];
-    flights.forEach(flight => {
-      flight.airlineName = flight.airline?.name;
-    });
-    setTableData(flights);
+  const getInsurancePlan = useCallback(async () => {
+    const plans = (await fetch("/api/insurance-plan").then(r => r.json())) || [];
+    setTableData(plans);
   }, [setTableData]);
-  const getAirlines = useCallback(async () => {
-    const airlines = (await fetch("/api/airline").then(r => r.json())) || [];
-    setAirlines(airlines);
-  }, [setAirlines]);
-  const getAirports = useCallback(async () => {
-    const airports = (await fetch("/api/airport").then(r => r.json())) || [];
-    setAirports(airports);
-  }, [setAirports]);
 
   useEffect(() => {
-    getFlights();
-    getAirlines();
-    getAirports();
-  }, [getFlights, getAirlines, getAirports]);
+    getInsurancePlan();
+  }, [getInsurancePlan]);
 
   useEffect(() => {
     if (updateForm) {
-      const form = document.forms["flight-form"];
-      form.flightId.value = updateForm.flightId;
-      form.departureAirport.value = updateForm.departureAirport;
-      form.arrivalAirport.value = updateForm.arrivalAirport;
-      form.departureTime.value = updateForm.departureTime;
-      form.arrivalTime.value = updateForm.arrivalTime;
-      form.airlineId.value = updateForm.airline.airlineId;
+      const form = document.forms["insurance-form"];
+      form.name.value = updateForm.name;
+      form.description.value = updateForm.description;
+      form.costPerPassenger.value = updateForm.costPerPassenger;
     }
   }, [updateForm]);
 
   const resetForm = (shouldRequest = true) => {
     setUpdateForm(null);
     setValidated(false);
-    document.forms["flight-form"].reset();
-    if (shouldRequest) getFlights();
+    document.forms["insurance-form"].reset();
+    if (shouldRequest) getInsurancePlan();
   };
 
   const onFormSubmit = async (e) => {
@@ -60,20 +41,16 @@ const InsurancePlan = (props) => {
     if (!form.checkValidity()) {
       return;
     }
-    const resp = await fetch("/api/flight", {
+    const resp = await fetch("/api/insurance-plan", {
       method: updateForm ? "PUT" : "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        flightId: form.flightId.value,
-        departureAirport: form.departureAirport.value,
-        arrivalAirport: form.arrivalAirport.value,
-        departureTime: form.departureTime.value,
-        arrivalTime: form.arrivalTime.value,
-        airline: {
-          airlineId: Number(form.airlineId.value)
-        }
+        planId: updateForm ? updateForm.planId : null,
+        name: form.name.value,
+        description: form.description.value,
+        costPerPassenger: Number(form.costPerPassenger.value),
       })
     });
     if (resp.ok) {
@@ -97,7 +74,7 @@ const InsurancePlan = (props) => {
             onClick={e => {
               const clickId = e.currentTarget.parentElement.getAttribute("data-id");
               resetForm(false);
-              setUpdateForm(tableData.find(flight => flight.flightId === clickId));
+              setUpdateForm(tableData.find(plan => plan.planId === Number(clickId)));
             }}
           >
             Edit
@@ -106,7 +83,7 @@ const InsurancePlan = (props) => {
             className="btn btn-sm btn-danger"
             onClick={async e => {
               const clickId = e.currentTarget.parentElement.getAttribute("data-id");
-              const resp = await fetch(`/api/flight?flightId=${clickId}`, {
+              const resp = await fetch(`/api/insurance-plan?planId=${clickId}`, {
                 method: "DELETE"
               });
               if (!resp.ok) {
@@ -127,7 +104,7 @@ const InsurancePlan = (props) => {
     <div className="p-3 row col-auto">
       <div className="card me-3 col-md-12 col-lg-3 py-3 mb-3">
         <h5>
-          { updateForm ? `Update ${updateForm.planId}` : 'Create a Flight' }
+          { updateForm ? `Update ${updateForm.name}` : 'Create an Insurance Plan' }
         </h5>
         <Form name="insurance-form" noValidate validated={validated} onSubmit={onFormSubmit}>
           <Form.Group>
@@ -154,7 +131,7 @@ const InsurancePlan = (props) => {
             </label>
             <Form.Control
               required
-              type="number"
+              type="decimal"
               className="form-control form-control-sm mb-3"
               name="costPerPassenger"
             />
@@ -177,7 +154,7 @@ const InsurancePlan = (props) => {
       </div>
       <div className="col-md-12 col-lg-8 mb-3" style={{ maxHeight: '30rem', overflow: 'scroll' }}>
         <Table
-          rowKey="flightId"
+          rowKey="planId"
           className="text-center"
           columns={columns}
           data={tableData}
