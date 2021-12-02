@@ -84,7 +84,7 @@ const FlightDetails = ({ flight }) => {
   );
 };
 
-const FlightSearchRow = ({ flight = [], searchDate }) => {
+const FlightSearchRow = ({ flight = [], searchDate, numOfPassenger }) => {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
   if (flight.length === 0)
@@ -126,6 +126,7 @@ const FlightSearchRow = ({ flight = [], searchDate }) => {
       flight,
       date: searchDate,
       duration: displayDiff,
+      numOfPassenger: Number(numOfPassenger),
     }));
     navigate(`/trip-summary?session=${id}`);
   };
@@ -233,6 +234,7 @@ const FlightSearchResult = () => {
   }, [getSearchResult]);
 
   const searchDate = searchParams.get('date') || moment().format('YYYY-MM-DD');
+  const numOfPassenger = searchParams.get('numOfPassenger') || 1;
   const displayDate = moment(searchDate, "YYYY-MM-DD").format("ddd, MMM DD, YYYY");
   return (
     <div className="p-3">
@@ -266,6 +268,7 @@ const FlightSearchResult = () => {
                   key={`${i}_${Math.random().toString(36).substr(4)}`}
                   flight={flight}
                   searchDate={searchDate}
+                  numOfPassenger={numOfPassenger}
                 />
               ))
             }

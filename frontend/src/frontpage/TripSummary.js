@@ -4,14 +4,314 @@ import { Form } from 'react-bootstrap';
 import moment from 'moment';
 import "./flightsearchresult.scss";
 
-const TripSummary = props => {
+const PassengerForm = ({
+  mealPlans,
+  specialRequests,
+  insurancePlan,
+  formName,
+  formValidated
+}) => {
+  useEffect(() => {
+    if (formValidated) {
+      document.forms[formName].reportValidity();
+    }
+  }, [formValidated]);
+  return (
+    <div className="row">
+      <div className="my-3 col-12 col-md-8">
+        <div className="card card-body">
+          <div className="fs-4 mb-3">Enter passenger information</div>
+          <Form
+            name={formName}
+            validated={formValidated}
+            noValidate
+          >
+            <Form.Group>
+              <div className="row">
+                <div className="col-4">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="First Name"
+                    name="firstName"
+                  />
+                </div>
+                <div className="col-4">
+                  <Form.Control
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Middle Name"
+                    name="middleName"
+                  />
+                </div>
+                <div className="col-4">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Last Name"
+                    name="lastName"
+                  />
+                </div>
+              </div>
+              <div className="row align-items-end mb-3">
+                <div className="col-6">
+                  <label style={{fontSize: '0.8rem'}}>
+                    Date of Birth
+                  </label>
+                  <Form.Control
+                    required
+                    type="date"
+                    className="form-control form-control-sm"
+                    name="dateOfBirth"
+                  />
+                </div>
+                <div className="col-6">
+                  <Form.Select
+                    required
+                    type="date"
+                    className="form-select form-select-sm"
+                    name="gender"
+                  >
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                  </Form.Select>
+                </div>
+              </div>
+              <div className="row align-items-end">
+                <div className="col-12">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Nationality (ex: USA)"
+                    name="nationality"
+                  />
+                </div>
+              </div>
+              <div className="row align-items-end">
+                <div className="col-6">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Passport Number"
+                    name="passportNum"
+                  />
+                </div>
+                <div className="col-6">
+                  <label style={{fontSize: '0.8rem'}}>
+                    Passport expired date
+                  </label>
+                  <Form.Control
+                    required
+                    type="date"
+                    className="form-control form-control-sm"
+                    name="passportExpireDate"
+                  />
+                </div>
+              </div>
+              <div className="row align-items-end">
+                <div className="col-6">
+                  <label style={{fontSize: '0.8rem'}}>
+                    Add an insurance plan
+                  </label>
+                  <Form.Select
+                    className="form-select form-select-sm"
+                    name="insurancePlan"
+                  >
+                    <option value="">I don't need an insurance</option>
+                    {
+                      insurancePlan.map(el => (
+                        <option key={el.planId} value={el.planId}>{el.name}</option>
+                      ))
+                    }
+                  </Form.Select>
+                </div>
+                <div className="col-6">
+                  <label style={{fontSize: '0.8rem'}}>
+                    Add a meal plan
+                  </label>
+                  <Form.Select
+                    className="form-select form-select-sm"
+                    name="mealPlan"
+                  >
+                    <option value="">I don't want any meal</option>
+                    {
+                      mealPlans.map(el => (
+                        <option key={el.id} value={el.id}>{ el.name }</option>
+                      ))
+                    }
+                  </Form.Select>
+                </div>
+              </div>
+              <div className="row align-items-end">
+                <div className="col-12">
+                  <label style={{fontSize: '0.8rem'}}>
+                    Special request
+                  </label>
+                  <Form.Select
+                    className="form-select form-select-sm"
+                    name="specialRequest"
+                  >
+                    <option value="">I don't need any special request</option>
+                    {
+                      specialRequests.map(el => (
+                        <option key={el.id} value={el.id}>{ el.name }</option>
+                      ))
+                    }
+                  </Form.Select>
+                </div>
+              </div>
+            </Form.Group>
+          </Form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CustomerForm = ({ validated }) => {
+  return (
+    <div className="row mb-3">
+      <div className="col-12 col-md-8">
+        <div className="card card-body">
+          <div className="fs-4 mb-3">Enter Customer information</div>
+          <Form name="customer-form" validated={validated} noValidate>
+            <Form.Group>
+              <div className="row mb-3">
+                <div className="col-12">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="street (ex: 6 metrotech)"
+                    name="street"
+                  />
+                </div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-6">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="City (ex: Brooklyn)"
+                    name="city"
+                  />
+                </div>
+                <div className="col-6">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Country (ex: United States)"
+                    name="country"
+                  />
+                </div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-12">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Zipcode (ex: 10003)"
+                    name="zipcode"
+                  />
+                </div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-4">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Phone country Code (ex: 1)"
+                    name="phoneCountryCode"
+                  />
+                </div>
+                <div className="col-8">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Phone Number (ex: 347222222)"
+                    name="phone"
+                  />
+                </div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-6">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Emergency Contact First Name"
+                    name="emerContactFirstName"
+                  />
+                </div>
+                <div className="col-6">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Emergency Contact Last Name"
+                    name="emerContactLastName"
+                  />
+                </div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-4">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Emergency Contact Phone country Code (ex: 1)"
+                    name="emerContactCountryCode"
+                  />
+                </div>
+                <div className="col-8">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Emergency Contact Phone Number (ex: 347222222)"
+                    name="emerContactPhone"
+                  />
+                </div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-12">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Member ID (ex: 646233847)"
+                    name="memberId"
+                  />
+                </div>
+              </div>
+            </Form.Group>
+          </Form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TripSummary = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
   const [searchDate, setSearchDate] = useState(null);
   const [duration, setDuration] = useState(null);
   const [mealPlans, setMealPlans] = useState([]);
   const [specialRequests, setSpecialRequests] = useState([]);
   const [insurancePlan, setInsurancePlan] = useState([]);
+  const [passengers, setPassengers] = useState([]);
+  const [customerValidated, setCustomerValidated] = useState(false);
 
   const getMealPlans = useCallback(async () => {
     const plans = await fetch("/api/meal-plan").then(r => r.json());
@@ -35,10 +335,68 @@ const TripSummary = props => {
   useEffect(() => {
     const sessionId = searchParams.get("session");
     const itinerary = JSON.parse(sessionStorage.getItem(sessionId));
-    setTrip(itinerary.flight);
-    setSearchDate(itinerary.date);
-    setDuration(itinerary.duration);
-  }, [searchParams, setTrip, setSearchDate, setDuration])
+    if (!itinerary) return;
+    const { flight, date, duration, numOfPassenger } = itinerary;
+    setTrip(flight);
+    setSearchDate(date);
+    setDuration(duration);
+    const passengers = [];
+    for (let i = 0; i < numOfPassenger; i++) {
+      passengers.push({
+        formId: `${i}_${Math.random().toString(36).substr(3)}`,
+        validated: false,
+      });
+    }
+    setPassengers(passengers);
+  }, [searchParams, setTrip, setSearchDate, setDuration, setPassengers]);
+
+  const handleSubmit = async () => {
+    const customerForm = document.forms["customer-form"];
+    const passengerForms = passengers.map(p => document.forms[p.formId]);
+    if (!customerForm.checkValidity()) {
+      setCustomerValidated(true);
+      customerForm.reportValidity();
+      return;
+    }
+    for (let i = 0; i < passengerForms.length; i++) {
+      if (!passengerForms[i].checkValidity()) {
+        passengerForms[i].reportValidity();
+        setPassengers(passengers.map(({ formId }) => {
+          return {
+            formId,
+            validated: true
+          };
+        }));
+        return;
+      }
+    }
+    const customer = {};
+    const intField = new Set(["phone", "phoneCountryCode", "emerContactCountryCode", "emerContactPhone", "passportNum"]);
+    ["street", "city", "country", "zipcode", "phoneCountryCode", "phone", "emerContactFirstName", "emerContactLastName", "emerContactCountryCode", "emerContactPhone", "memberId"].forEach(key => {
+      customer[key] = intField.has(key) ? Number(customerForm[key].value) : customerForm[key].value;
+    });
+    const resp = await fetch("/api/itinerary/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customer,
+        passengers: passengerForms.map(form => {
+          const data = {};
+          ["firstName", "middleName", "lastName", "dateOfBirth", "gender", "passportNum", "passportExpireDate", "nationality", "insurancePlan", "mealPlan", "specialRequest"].forEach(key => {
+            data[key] = intField.has(key) ? Number(form.elements[key].value) : form.elements[key].value;
+          });
+          return data;
+        }),
+      }),
+    });
+    if (resp.ok) {
+      navigate("/itinerary/summary");
+    } else {
+      alert(`Error: ${resp.status}`);
+    }
+  };
 
   const stops = trip && trip.length > 0 ? `${trip[0].departureAirport} - ${trip.map(el => el.arrivalAirport).join(' - ')}` : '';
   const flights = trip && trip.length > 0 ? trip.map(el => el.flightId).join(', ') : '';
@@ -79,7 +437,7 @@ const TripSummary = props => {
               Trip Total
             </div>
             <small className="text-muted">
-              1 Passenger
+              {passengers.length} Passenger
             </small>
             <div className="d-flex justify-content-between">
               <span>Flights</span>
@@ -95,7 +453,7 @@ const TripSummary = props => {
             </div>
             <div className="row mt-3">
               <div className="col">
-                <button className="btn btn-primary form-control">
+                <button className="btn btn-primary form-control" onClick={handleSubmit}>
                   Confirm And Pay
                 </button>
               </div>
@@ -104,282 +462,21 @@ const TripSummary = props => {
         </div>
       </div>
       {/* Customer information */}
-      <div className="row mb-3">
-        <div className="col-12 col-md-8">
-          <div className="card card-body">
-            <div className="fs-4 mb-3">Enter Customer information</div>
-            <Form noValidate>
-              <Form.Group>
-                <div className="row mb-3">
-                  <div className="col-12">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="street (ex: 6 metrotech)"
-                      name="street"
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-6">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="City (ex: Brooklyn)"
-                      name="city"
-                    />
-                  </div>
-                  <div className="col-6">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Country (ex: United States)"
-                      name="country"
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-12">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Zipcode (ex: 10003)"
-                      name="zipcode"
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-4">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Phone country Code (ex: 1)"
-                      name="phoneCountryCode"
-                    />
-                  </div>
-                  <div className="col-8">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Phone Number (ex: 347222222)"
-                      name="phone"
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-6">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Emergency Contact First Name"
-                      name="emerContactFirstName"
-                    />
-                  </div>
-                  <div className="col-6">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Emergency Contact Last Name"
-                      name="emerContactLastName"
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-4">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Emergency Contact Phone country Code (ex: 1)"
-                      name="emerContactCountryCode"
-                    />
-                  </div>
-                  <div className="col-8">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Emergency Contact Phone Number (ex: 347222222)"
-                      name="emerContactPhone"
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-12">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Member ID (ex: 646233847)"
-                      name="memberId"
-                    />
-                  </div>
-                </div>
-              </Form.Group>
-            </Form>
-          </div>
-        </div>
-      </div>
-      {/* Passenger information */}
-      <div className="row">
-        <div className="my-3 col-12 col-md-8">
-          <div className="card card-body">
-            <div className="fs-4 mb-3">Enter passenger information</div>
-            <Form noValidate>
-              <Form.Group>
-                <div className="row">
-                  <div className="col-4">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="First Name"
-                      name="firstName"
-                    />
-                  </div>
-                  <div className="col-4">
-                    <Form.Control
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Middle Name"
-                      name="middleName"
-                    />
-                  </div>
-                  <div className="col-4">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Last Name"
-                      name="lastName"
-                    />
-                  </div>
-                </div>
-                <div className="row align-items-end mb-3">
-                  <div className="col-6">
-                    <label style={{fontSize: '0.8rem'}}>
-                      Date of Birth
-                    </label>
-                    <Form.Control
-                      required
-                      type="date"
-                      className="form-control form-control-sm"
-                      name="dateOfBirth"
-                    />
-                  </div>
-                  <div className="col-6">
-                    <Form.Select
-                      required
-                      type="date"
-                      className="form-select form-select-sm"
-                      name="gender"
-                    >
-                      <option value="M">Male</option>
-                      <option value="F">Female</option>
-                    </Form.Select>
-                  </div>
-                </div>
-                <div className="row align-items-end">
-                  <div className="col-12">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Nationality (ex: USA)"
-                      name="nationality"
-                    />
-                  </div>
-                </div>
-                <div className="row align-items-end">
-                  <div className="col-6">
-                    <Form.Control
-                      required
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Passport Number"
-                      name="passportNum"
-                    />
-                  </div>
-                  <div className="col-6">
-                    <label style={{fontSize: '0.8rem'}}>
-                      Passport expired date
-                    </label>
-                    <Form.Control
-                      required
-                      type="date"
-                      className="form-control form-control-sm"
-                      name="passportExpireDate"
-                    />
-                  </div>
-                </div>
-                <div className="row align-items-end">
-                  <div className="col-6">
-                    <label style={{fontSize: '0.8rem'}}>
-                      Add an insurance plan
-                    </label>
-                    <Form.Select
-                      required
-                      className="form-select form-select-sm"
-                      name="insurance"
-                    >
-                      <option value="">I don't need an insurance</option>
-                      {
-                        insurancePlan.map(el => (
-                          <option key={el.planId} value={el.planId}>{el.name}</option>
-                        ))
-                      }
-                    </Form.Select>
-                  </div>
-                  <div className="col-6">
-                    <label style={{fontSize: '0.8rem'}}>
-                      Add a meal plan
-                    </label>
-                    <Form.Select
-                      required
-                      className="form-select form-select-sm"
-                      name="mealPlan"
-                    >
-                      <option value="">I don't want any meal</option>
-                      {
-                        mealPlans.map(el => (
-                          <option key={el.id} value={el.id}>{ el.name }</option>
-                        ))
-                      }
-                    </Form.Select>
-                  </div>
-                </div>
-                <div className="row align-items-end">
-                  <div className="col-12">
-                    <label style={{fontSize: '0.8rem'}}>
-                      Special request
-                    </label>
-                    <Form.Select
-                      required
-                      className="form-select form-select-sm"
-                      name="mealPlan"
-                    >
-                      <option value="">I don't need any special request</option>
-                      {
-                        specialRequests.map(el => (
-                          <option key={el.id} value={el.id}>{ el.name }</option>
-                        ))
-                      }
-                    </Form.Select>
-                  </div>
-                </div>
-              </Form.Group>
-            </Form>
-          </div>
-        </div>
-      </div>
+      <CustomerForm
+        validated={customerValidated}
+      />
+      {
+        passengers.map((_, index) => (
+          <PassengerForm
+            key={`${index}_${Math.random().toString(36).substr(3)}`}
+            mealPlans={mealPlans}
+            specialRequests={specialRequests}
+            insurancePlan={insurancePlan}
+            formName={passengers[index].formId}
+            formValidated={passengers[index].validated}
+          />
+        ))
+      }
     </div>
   ) : (
     <div className="d-flex justify-content-center align-items-center flex-column" style={{ height: 'calc(100vh - 81px)' }}>

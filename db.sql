@@ -125,9 +125,9 @@ create table customer
     phone_country_code        integer not null,
     emer_contact_fname        varchar not null,
     emer_contact_lname        varchar not null,
-    emer_contact_number       integer not null,
+    emer_contact_phone        integer not null,
     emer_contact_country_code integer not null,
-    insurance_plan_plan_id    integer not null
+    insurance_plan_id         integer not null
         constraint customer_insurance_plan_fk
             references insurance_plan
             on update cascade on delete cascade,
@@ -164,14 +164,14 @@ alter table agent
 
 create table invoice
 (
-    invoice_number       integer not null
+    invoice_number integer not null
         constraint invoice_pk
             primary key,
-    invoice_date         date    not null,
-    amount               numeric(8, 2)
+    invoice_date   date    not null,
+    amount         numeric(8, 2)
         constraint invoice_amount_check
             check (amount > (0)::numeric),
-    customer_customer_id integer not null
+    customer_id    integer not null
         constraint invoice_customer_fk
             references customer
             on update cascade on delete cascade
@@ -186,7 +186,7 @@ alter table customer
             on update cascade on delete cascade;
 
 create unique index invoice__idx
-    on invoice (customer_customer_id);
+    on invoice (customer_id);
 
 create table passenger
 (
