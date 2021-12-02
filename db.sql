@@ -212,24 +212,24 @@ alter table passenger
 
 create table payment
 (
-    payment_id             integer not null,
-    payment_date           date    not null,
-    amount                 numeric(8, 2)
+    payment_id        integer not null,
+    payment_date      date    not null,
+    amount            numeric(8, 2)
         constraint payment_amount_check
             check (amount > (0)::numeric),
-    method                 char
+    method            char
         constraint payment_method_check
-            check (method = ANY (ARRAY ['D'::bpchar, 'C'::bpchar])),
-    card_number            varchar not null,
-    card_holder_fname      varchar not null,
-    card_holder_lname      varchar not null,
-    expire_date            date    not null,
-    invoice_invoice_number integer not null
+            check (method = ANY (ARRAY ['D'::bpchar, 'C'::bpchar]))
+    card_number       varchar not null,
+    card_holder_fname varchar not null,
+    card_holder_lname varchar not null,
+    expire_date       date    not null,
+    invoice_number    integer not null
         constraint payment_invoice_fk
             references invoice
             on update cascade on delete cascade,
     constraint payment_pk
-        primary key (payment_id, invoice_invoice_number)
+        primary key (payment_id, invoice_number)
 );
 
 alter table payment

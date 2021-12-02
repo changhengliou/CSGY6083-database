@@ -215,3 +215,17 @@ func SpecialRequestController(c *gin.Context) {
 		{"4", "Medical assistance"},
 	})
 }
+
+func ItineraryCheckoutController(c *gin.Context) {
+	var req *model.PaymentReq
+	if err := c.BindJSON(&req); err != nil {
+		log.Println(err)
+		return
+	}
+	if confirmNum, err := service.CompleteItineraryTransaction(req); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+	} else {
+		c.JSON(http.StatusOK, gin.H{"confirmNum": confirmNum})
+	}
+}

@@ -120,13 +120,14 @@ const FlightSearchRow = ({ flight = [], searchDate, numOfPassenger }) => {
     svgXPos.push('95%');
   }
   const displayDiff = `${diffHours ? diffHours + 'h' : ''}${diffMins}m`;
-  const handleTicketPurchase = () => {
+  const handleTicketPurchase = (cabinClass) => {
     const id = Math.random().toString(36).substring(3);
     window.sessionStorage.setItem(id, JSON.stringify({
       flight,
       date: searchDate,
       duration: displayDiff,
       numOfPassenger: Number(numOfPassenger),
+      cabinClass,
     }));
     navigate(`/trip-summary?session=${id}`);
   };
@@ -190,19 +191,19 @@ const FlightSearchRow = ({ flight = [], searchDate, numOfPassenger }) => {
       { /* card ends here */ }
       <div
         className="card card-price price-eco col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center"
-        onClick={handleTicketPurchase}
+        onClick={() => { handleTicketPurchase('Economy') }}
       >
         $1,781
       </div>
       <div
         className="card card-price price-biz col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center"
-        onClick={handleTicketPurchase}
+        onClick={() => { handleTicketPurchase('business') }}
       >
         $2,077
       </div>
       <div
         className="card card-price price-first col-md-2 d-none d-sm-none d-md-flex justify-content-center align-items-center"
-        onClick={handleTicketPurchase}
+        onClick={() => { handleTicketPurchase('first') }}
       >
         $3,365
       </div>

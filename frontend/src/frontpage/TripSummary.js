@@ -20,7 +20,7 @@ const PassengerForm = ({
     <div className="row">
       <div className="my-3 col-12 col-md-8">
         <div className="card card-body">
-          <div className="fs-4 mb-3">Enter passenger information</div>
+          <div className="fs-4 mb-3">Enter Passenger Information</div>
           <Form
             name={formName}
             validated={formValidated}
@@ -177,7 +177,7 @@ const CustomerForm = ({ validated }) => {
     <div className="row mb-3">
       <div className="col-12 col-md-8">
         <div className="card card-body">
-          <div className="fs-4 mb-3">Enter Customer information</div>
+          <div className="fs-4 mb-3">Enter Customer Information</div>
           <Form name="customer-form" validated={validated} noValidate>
             <Form.Group>
               <div className="row mb-3">
@@ -186,7 +186,7 @@ const CustomerForm = ({ validated }) => {
                     required
                     type="text"
                     className="form-control form-control-sm"
-                    placeholder="street (ex: 6 metrotech)"
+                    placeholder="Street (ex: 6 metrotech)"
                     name="street"
                   />
                 </div>
@@ -301,17 +301,76 @@ const CustomerForm = ({ validated }) => {
   );
 };
 
+const PaymentForm = ({ validated }) => {
+  return (
+    <div className="row mb-3">
+      <div className="col-12 col-md-8">
+        <div className="card card-body">
+          <div className="fs-4 mb-3">Enter Payment Information</div>
+          <Form name="payment-form" validated={validated} noValidate>
+            <Form.Group>
+              <div className="row mb-3">
+                <div className="col-4">
+                  <Form.Select
+                    required
+                    className="form-select form-select-sm"
+                    name="method"
+                  >
+                    <option value="C">Credit Card</option>
+                    <option value="D">Debit Card</option>
+                  </Form.Select>
+                </div>
+                <div className="col-8">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Card Number (ex: 4111111111111111)"
+                    name="cardNumber"
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-6">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Card Holder First Name"
+                    name="cardHolderFirstName"
+                  />
+                </div>
+                <div className="col-6">
+                  <Form.Control
+                    required
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Card Holder Last Name"
+                    name="cardHolderLastName"
+                  />
+                </div>
+              </div>
+            </Form.Group>
+          </Form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TripSummary = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
   const [searchDate, setSearchDate] = useState(null);
   const [duration, setDuration] = useState(null);
+  const [cabinClass, setCabinClass] = useState(null);
   const [mealPlans, setMealPlans] = useState([]);
   const [specialRequests, setSpecialRequests] = useState([]);
   const [insurancePlan, setInsurancePlan] = useState([]);
   const [passengers, setPassengers] = useState([]);
   const [customerValidated, setCustomerValidated] = useState(false);
+  const [paymentValidated, setPaymentValidated] = useState(false);
 
   const getMealPlans = useCallback(async () => {
     const plans = await fetch("/api/meal-plan").then(r => r.json());
@@ -336,10 +395,11 @@ const TripSummary = () => {
     const sessionId = searchParams.get("session");
     const itinerary = JSON.parse(sessionStorage.getItem(sessionId));
     if (!itinerary) return;
-    const { flight, date, duration, numOfPassenger } = itinerary;
+    const { flight, date, duration, numOfPassenger, cabinClass } = itinerary;
     setTrip(flight);
     setSearchDate(date);
     setDuration(duration);
+    setCabinClass(cabinClass);
     const passengers = [];
     for (let i = 0; i < numOfPassenger; i++) {
       passengers.push({
@@ -348,14 +408,20 @@ const TripSummary = () => {
       });
     }
     setPassengers(passengers);
-  }, [searchParams, setTrip, setSearchDate, setDuration, setPassengers]);
+  }, [searchParams, setTrip, setSearchDate, setDuration, setCabinClass, setPassengers]);
 
   const handleSubmit = async () => {
     const customerForm = document.forms["customer-form"];
+    const paymentForm = document.forms["payment-form"];
     const passengerForms = passengers.map(p => document.forms[p.formId]);
     if (!customerForm.checkValidity()) {
       setCustomerValidated(true);
       customerForm.reportValidity();
+      return;
+    }
+    if (!paymentForm.checkValidity()) {
+      setPaymentValidated(true);
+      paymentForm.reportValidity();
       return;
     }
     for (let i = 0; i < passengerForms.length; i++) {
@@ -375,6 +441,10 @@ const TripSummary = () => {
     ["street", "city", "country", "zipcode", "phoneCountryCode", "phone", "emerContactFirstName", "emerContactLastName", "emerContactCountryCode", "emerContactPhone", "memberId"].forEach(key => {
       customer[key] = intField.has(key) ? Number(customerForm[key].value) : customerForm[key].value;
     });
+    const payment = {};
+    ["method", "cardNumber", "cardHolderFirstName", "cardHolderLastName"].forEach(key => {
+      payment[key] = paymentForm[key].value;
+    });
     const resp = await fetch("/api/itinerary/checkout", {
       method: "POST",
       headers: {
@@ -382,6 +452,8 @@ const TripSummary = () => {
       },
       body: JSON.stringify({
         customer,
+        payment,
+        cabinClass,
         passengers: passengerForms.map(form => {
           const data = {};
           ["firstName", "middleName", "lastName", "dateOfBirth", "gender", "passportNum", "passportExpireDate", "nationality", "insurancePlan", "mealPlan", "specialRequest"].forEach(key => {
@@ -461,10 +533,8 @@ const TripSummary = () => {
           </div>
         </div>
       </div>
-      {/* Customer information */}
-      <CustomerForm
-        validated={customerValidated}
-      />
+      <CustomerForm validated={customerValidated} />
+      <PaymentForm validated={paymentValidated} />
       {
         passengers.map((_, index) => (
           <PassengerForm

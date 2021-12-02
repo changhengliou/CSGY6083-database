@@ -351,3 +351,7 @@ func DeleteInsurancePlanById(planId string) (int, error) {
 	cnt, _ := r.RowsAffected()
 	return int(cnt), err
 }
+
+func CompleteItineraryTransaction(req *model.PaymentReq) (string, error) {
+	return "", nil
+}

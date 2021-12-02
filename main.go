@@ -39,6 +39,8 @@ func main() {
 
 		apiController.GET("/meal-plan", api.MealPlanController)
 		apiController.GET("/special-request", api.SpecialRequestController)
+
+		apiController.POST("/itinerary/checkout", api.InsurancePlanController)
 	}
 
 	if err := r.Run(); err != nil {

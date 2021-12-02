@@ -165,7 +165,20 @@ type Agent struct {
 	Phone      int       `json:"phone" db:"phone" binding:"required"`
 }
 
+type Payment struct {
+	PaymentId           int       `json:"paymentId" db:"payment_id"`
+	PaymentDate         *dateOnly `json:"paymentDate" db:"payment_date"`
+	Amount              float64   `json:"amount" db:"amount"`
+	Method              string    `json:"method" db:"method" binding:"required"`
+	CardNumber          string    `json:"cardNumber" db:"card_number" binding:"required"`
+	CardHolderFirstName string    `json:"cardHolderFirstName" db:"card_holder_fname" binding:"required"`
+	CardHolderLastName  string    `json:"cardHolderLastName" db:"card_holder_lname" binding:"required"`
+	Invoice             *Invoice  `json:"invoice" db:"invoice" binding:"-"`
+}
+
 type PaymentReq struct {
 	Customer   *Customer    `json:"customer" db:"customer" binding:"-"`
-	Passengers []*Passenger `json:"passengers" db:"passenger" binding:"required"`
+	Passengers []*Passenger `json:"passengers" db:"passenger" binding:"-"`
+	Payment    *Payment     `json:"payment" db:"payment" binding:"-"`
+	CabinClass string       `json:"cabinClass" db:"cabin_class" binding:"required"`
 }
