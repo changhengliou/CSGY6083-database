@@ -222,10 +222,10 @@ func ItineraryCheckoutController(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	if confirmNum, err := service.CompleteItineraryTransaction(req); err != nil {
+	if err := service.CompleteItineraryTransaction(req); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, err)
 	} else {
-		c.JSON(http.StatusOK, gin.H{"confirmNum": confirmNum})
+		c.JSON(http.StatusOK, gin.H{"confirmNum": ""})
 	}
 }

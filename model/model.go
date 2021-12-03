@@ -6,10 +6,10 @@ import (
 )
 
 type timeOnly time.Time
-type dateOnly time.Time
+type DateOnly time.Time
 
 var _ json.Unmarshaler = &timeOnly{}
-var _ json.Unmarshaler = &dateOnly{}
+var _ json.Unmarshaler = &DateOnly{}
 
 func (mt *timeOnly) MarshalJSON() ([]byte, error) {
 	b, err := json.Marshal(mt.Time().Format("15:04"))
@@ -19,7 +19,7 @@ func (mt *timeOnly) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
-func (mt *dateOnly) MarshalJSON() ([]byte, error) {
+func (mt *DateOnly) MarshalJSON() ([]byte, error) {
 	b, err := json.Marshal(mt.Date().Format("2006-01-02"))
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (mt *timeOnly) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-func (mt *dateOnly) UnmarshalJSON(bs []byte) error {
+func (mt *DateOnly) UnmarshalJSON(bs []byte) error {
 	var s string
 	err := json.Unmarshal(bs, &s)
 	if err != nil {
@@ -51,7 +51,7 @@ func (mt *dateOnly) UnmarshalJSON(bs []byte) error {
 	if err != nil {
 		return err
 	}
-	*mt = dateOnly(t)
+	*mt = DateOnly(t)
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (mt *timeOnly) Time() *time.Time {
 	return &c
 }
 
-func (mt *dateOnly) Date() *time.Time {
+func (mt *DateOnly) Date() *time.Time {
 	c := time.Time(*mt)
 	return &c
 }
@@ -106,34 +106,32 @@ type InsurancePlan struct {
 type Member struct {
 	MemberId            int       `json:"memberId" db:"member_id"`
 	MembershipName      string    `json:"membershipName" db:"membership_name" binding:"required"`
-	MembershipStartDate *dateOnly `json:"membershipStartDate" db:"membership_start_date" binding:"required"`
-	MembershipEndDate   *dateOnly `json:"membershipEndDate" db:"membership_end_date" binding:"required"`
+	MembershipStartDate *DateOnly `json:"membershipStartDate" db:"membership_start_date" binding:"required"`
+	MembershipEndDate   *DateOnly `json:"membershipEndDate" db:"membership_end_date" binding:"required"`
 	Airline             *Airline  `json:"airline" db:"airline" binding:"-"`
 }
 
 type Invoice struct {
 	InvoiceNumber int       `json:"invoiceNumber" db:"invoice_number"`
-	Date          *dateOnly `json:"date" db:"invoice_date"`
+	Date          *DateOnly `json:"date" db:"invoice_date"`
 	Amount        float64   `json:"amount" db:"amount"`
 	Customer      *Customer `json:"customer" db:"customer" binding:"-"`
 }
 
 type Customer struct {
-	CustomerId                  int            `json:"customerId" db:"customer_id"`
-	Street                      string         `json:"street" binding:"required"`
-	City                        string         `json:"city" binding:"required"`
-	Country                     string         `json:"country" binding:"required"`
-	Zipcode                     string         `json:"zipcode" binding:"required"`
-	Phone                       int            `json:"phone" binding:"required"`
-	PhoneCountryCode            int            `json:"phoneCountryCode" db:"phone_country_code" binding:"required"`
-	EmergencyContactFirstName   string         `json:"emergencyContactFirstName" db:"emer_contact_fname" binding:"required"`
-	EmergencyContactLastName    string         `json:"emergencyContactLastName" db:"emer_contact_lname" binding:"required"`
-	EmergencyContactPhone       int            `json:"emergencyContactPhone" db:"emer_contact_phone" binding:"required"`
-	EmergencyContactCountryCode int            `json:"emergencyContactCountryCode" db:"emer_contact_country_code" binding:"required"`
-	Type                        byte           `json:"type" db:"type" binding:"required"`
-	InsurancePlan               *InsurancePlan `json:"insurancePlan" db:"insurance_plan" binding:"-"`
-	Invoice                     *Invoice       `json:"invoice" db:"invoice" binding:"-"`
-	Member                      *Member        `json:"member" db:"member" binding:"-"`
+	CustomerId                  int     `json:"customerId" db:"customer_id"`
+	Street                      string  `json:"street" binding:"required"`
+	City                        string  `json:"city" binding:"required"`
+	Country                     string  `json:"country" binding:"required"`
+	Zipcode                     string  `json:"zipcode" binding:"required"`
+	Phone                       int64   `json:"phone" binding:"required"`
+	PhoneCountryCode            int     `json:"phoneCountryCode" db:"phone_country_code" binding:"required"`
+	EmergencyContactFirstName   string  `json:"emergencyContactFirstName" db:"emer_contact_fname" binding:"required"`
+	EmergencyContactLastName    string  `json:"emergencyContactLastName" db:"emer_contact_lname" binding:"required"`
+	EmergencyContactPhone       int64   `json:"emergencyContactPhone" db:"emer_contact_phone" binding:"required"`
+	EmergencyContactCountryCode int     `json:"emergencyContactCountryCode" db:"emer_contact_country_code" binding:"required"`
+	Type                        byte    `json:"type" db:"type" binding:"required"`
+	Member                      *Member `json:"member" db:"member" binding:"-"`
 }
 
 type Passenger struct {
@@ -141,10 +139,10 @@ type Passenger struct {
 	FirstName          string    `json:"firstName" db:"first_name" binding:"required"`
 	MiddleName         string    `json:"middleName" db:"middle_name"`
 	LastName           string    `json:"lastName" db:"last_name" binding:"required"`
-	DateOfBirth        *dateOnly `json:"dateOfBirth" db:"date_of_birth" binding:"required"`
+	DateOfBirth        *DateOnly `json:"dateOfBirth" db:"date_of_birth" binding:"required"`
 	Gender             byte      `json:"gender" binding:"required"`
-	PassportNum        int       `json:"passportNum" db:"passport_num" binding:"required"`
-	PassportExpireDate *dateOnly `json:"passportExpireDate" db:"passport_expire_date" binding:"required"`
+	PassportNum        int64     `json:"passportNum" db:"passport_num" binding:"required"`
+	PassportExpireDate *DateOnly `json:"passportExpireDate" db:"passport_expire_date" binding:"required"`
 	Nationality        string    `json:"nationality" binding:"required"`
 	Customer           *Customer `json:"customer" db:"customer" binding:"-"`
 }
@@ -167,18 +165,27 @@ type Agent struct {
 
 type Payment struct {
 	PaymentId           int       `json:"paymentId" db:"payment_id"`
-	PaymentDate         *dateOnly `json:"paymentDate" db:"payment_date"`
+	PaymentDate         *DateOnly `json:"paymentDate" db:"payment_date"`
 	Amount              float64   `json:"amount" db:"amount"`
 	Method              string    `json:"method" db:"method" binding:"required"`
 	CardNumber          string    `json:"cardNumber" db:"card_number" binding:"required"`
 	CardHolderFirstName string    `json:"cardHolderFirstName" db:"card_holder_fname" binding:"required"`
 	CardHolderLastName  string    `json:"cardHolderLastName" db:"card_holder_lname" binding:"required"`
+	ExpiryDate          *DateOnly `json:"expiryDate" db:"expiry_date" binding:"required"`
 	Invoice             *Invoice  `json:"invoice" db:"invoice" binding:"-"`
 }
 
+type PassengerReq struct {
+	Passenger      *Passenger `json:"passengers" db:"passenger" binding:"-"`
+	MealPlan       string     `json:"mealPlan" binding:"omitEmpty"`
+	SpecialRequest string     `json:"specialRequest" binding:"omitEmpty"`
+}
+
 type PaymentReq struct {
-	Customer   *Customer    `json:"customer" db:"customer" binding:"-"`
-	Passengers []*Passenger `json:"passengers" db:"passenger" binding:"-"`
-	Payment    *Payment     `json:"payment" db:"payment" binding:"-"`
-	CabinClass string       `json:"cabinClass" db:"cabin_class" binding:"required"`
+	Customer   *Customer       `json:"customer" db:"customer" binding:"-"`
+	Passengers []*PassengerReq `json:"passengers" db:"passenger" binding:"-"`
+	Cards      []*Payment      `json:"cards" db:"payment" binding:"-"`
+	CabinClass string          `json:"cabinClass" db:"cabin_class" binding:"required"`
+	Flights    []string        `json:"flights" binding:"required"`
+	Amount     float64         `json:"amount" binding:"required"`
 }

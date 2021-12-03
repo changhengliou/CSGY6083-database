@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -36,6 +38,11 @@ import (
 //
 // Security check on password reset, stored procedures, user functions, history
 // tables etc.
+
+const (
+	MAX_ID = 999999
+	MIN_ID = 100000
+)
 
 var (
 	db = initDbConnection()
@@ -352,6 +359,121 @@ func DeleteInsurancePlanById(planId string) (int, error) {
 	return int(cnt), err
 }
 
-func CompleteItineraryTransaction(req *model.PaymentReq) (string, error) {
-	return "", nil
+// a customer can use 2 cards to pay for a flight
+func CompleteItineraryTransaction(req *model.PaymentReq) error {
+	currDate := time.Now().Format("2006-01-02")
+	invoiceNumber := rand.Intn(MAX_ID-MIN_ID) + MIN_ID
+	customerId := rand.Intn(MAX_ID-MIN_ID) + MIN_ID
+
+	tx := db.MustBegin()
+	tx.MustExec(
+		`INSERT INTO customer (
+			customer_id,
+			street,
+			city,
+			country,
+			zipcode,
+			phone,
+			phone_country_code,
+			emer_contact_fname,
+			emer_contact_lname,
+			emer_contact_phone,
+			emer_contact_country_code,
+			type,
+			member_id
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+		customerId,
+		req.Customer.Street,
+		req.Customer.City,
+		req.Customer.Country,
+		req.Customer.Zipcode,
+		req.Customer.Phone,
+		req.Customer.PhoneCountryCode,
+		req.Customer.EmergencyContactFirstName,
+		req.Customer.EmergencyContactLastName,
+		req.Customer.EmergencyContactPhone,
+		req.Customer.EmergencyContactCountryCode,
+		req.Customer.Type,
+		req.Customer.Member.MemberId)
+	tx.MustExec(
+		`INSERT INTO invoice (
+			invoice_number, 
+			invoice_date, 
+			amount, 
+			customer_id) VALUES ($1, $2, $3, $4)`,
+		invoiceNumber,
+		currDate,
+		req.Amount,
+		customerId)
+	for _, card := range req.Cards {
+		tx.MustExec(
+			`INSERT INTO payment (
+				payment_id,
+				amount,
+				payment_date,
+				method,
+				card_number,
+				card_holder_first_name,
+				card_holder_last_name,
+				expiry_date,
+				invoice_number
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`,
+			rand.Intn(MAX_ID-MIN_ID)+MIN_ID,
+			card.Amount,
+			card.PaymentDate,
+			card.Method,
+			card.CardNumber,
+			card.CardHolderFirstName,
+			card.CardHolderLastName,
+			card.ExpiryDate,
+			invoiceNumber)
+	}
+	for _, passengerReq := range req.Passengers {
+		passenger := passengerReq.Passenger
+		tx.MustExec(
+			`INSERT INTO passenger (
+				passenger_id,
+				first_name,
+				middle_name,
+				last_name,
+				date_of_birth,
+				gender,
+				passport_num,
+				passport_expire_date,
+				nationality,
+				customer_id
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`,
+			passenger.PassengerId,
+			passenger.FirstName,
+			passenger.MiddleName,
+			passenger.LastName,
+			passenger.DateOfBirth,
+			passenger.Gender,
+			passenger.PassportNum,
+			passenger.PassportExpireDate,
+			passenger.Nationality,
+			customerId,
+		)
+
+		for _, flight := range req.Flights {
+			tx.MustExec(
+				`INSERT INTO itinerary (
+					passenger_id,
+					flight_id,
+					customer_id,
+					cabin_class,
+					meal_plan,
+					special_request
+				) VALUES ($1, $2, $3, $4, $5, $6);`,
+				passenger.PassengerId,
+				flight,
+				customerId,
+				req.CabinClass,
+				passengerReq.MealPlan,
+				passengerReq.SpecialRequest,
+			)
+		}
+	}
+	err := tx.Commit()
+	return err
 }

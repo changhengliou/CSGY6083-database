@@ -40,7 +40,7 @@ func main() {
 		apiController.GET("/meal-plan", api.MealPlanController)
 		apiController.GET("/special-request", api.SpecialRequestController)
 
-		apiController.POST("/itinerary/checkout", api.InsurancePlanController)
+		apiController.POST("/itinerary/checkout", api.ItineraryCheckoutController)
 	}
 
 	if err := r.Run(); err != nil {

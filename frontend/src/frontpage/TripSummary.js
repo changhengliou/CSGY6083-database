@@ -302,56 +302,84 @@ const CustomerForm = ({ validated }) => {
 };
 
 const PaymentForm = ({ validated }) => {
+  const [paymentOption, setPaymentOption] = useState("0");
   return (
     <div className="row mb-3">
       <div className="col-12 col-md-8">
         <div className="card card-body">
-          <div className="fs-4 mb-3">Enter Payment Information</div>
-          <Form name="payment-form" validated={validated} noValidate>
-            <Form.Group>
-              <div className="row mb-3">
-                <div className="col-4">
-                  <Form.Select
-                    required
-                    className="form-select form-select-sm"
-                    name="method"
-                  >
-                    <option value="C">Credit Card</option>
-                    <option value="D">Debit Card</option>
-                  </Form.Select>
-                </div>
-                <div className="col-8">
-                  <Form.Control
-                    required
-                    type="text"
-                    className="form-control form-control-sm"
-                    placeholder="Card Number (ex: 4111111111111111)"
-                    name="cardNumber"
-                  />
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-6">
-                  <Form.Control
-                    required
-                    type="text"
-                    className="form-control form-control-sm"
-                    placeholder="Card Holder First Name"
-                    name="cardHolderFirstName"
-                  />
-                </div>
-                <div className="col-6">
-                  <Form.Control
-                    required
-                    type="text"
-                    className="form-control form-control-sm"
-                    placeholder="Card Holder Last Name"
-                    name="cardHolderLastName"
-                  />
-                </div>
-              </div>
-            </Form.Group>
-          </Form>
+          <div className="fs-4">Enter Payment Information</div>
+          <div style={{ fontSize: '0.8rem' }} className="mb-2">
+            We accept at most 2 credit cards for this transaction
+          </div>
+          <div className="d-flex align-items-center">
+            <label style={{ fontSize: '0.8rem', verticalAlign: 'middle', width: '150px' }}>
+              Payment Options
+            </label>
+            <Form.Select
+              required
+              className="form-select form-select-sm"
+              value={paymentOption}
+              onChange={(e) => {setPaymentOption(e.currentTarget.value)}}
+            >
+              <option value="0">Pay full amount using 1 card</option>
+              <option value="1">Pay 50%/50% using 2 cards</option>
+              <option value="2">Pay 67%/33% using 2 cards</option>
+              <option value="3">Pay 75%/25% using 2 cards</option>
+              <option value="4">Pay 80%/20% using 2 cards</option>
+            </Form.Select>
+          </div>
+          {
+            new Array(paymentOption !== '0' ? 2 : 1).fill(0).map((_, idx) => {
+              return (
+                <Form key={idx} name={`payment-form-${idx}`} validated={validated} noValidate className={ !idx ? 'mb-3' : '' }>
+                  <Form.Group>
+                    <label style={{ fontSize: '0.8rem' }}>Card {idx + 1}</label>
+                    <div className="row mb-3">
+                      <div className="col-4">
+                        <Form.Select
+                          required
+                          className="form-select form-select-sm"
+                          name="method"
+                        >
+                          <option value="C">Credit Card</option>
+                          <option value="D">Debit Card</option>
+                        </Form.Select>
+                      </div>
+                      <div className="col-8">
+                        <Form.Control
+                          required
+                          type="text"
+                          className="form-control form-control-sm"
+                          placeholder="Card Number (ex: 4111111111111111)"
+                          name="cardNumber"
+                        />
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-6">
+                        <Form.Control
+                          required
+                          type="text"
+                          className="form-control form-control-sm"
+                          placeholder="Card Holder First Name"
+                          name="cardHolderFirstName"
+                        />
+                      </div>
+                      <div className="col-6">
+                        <Form.Control
+                          required
+                          type="text"
+                          className="form-control form-control-sm"
+                          placeholder="Card Holder Last Name"
+                          name="cardHolderLastName"
+                        />
+                      </div>
+                    </div>
+                  </Form.Group>
+                </Form>
+              );
+            })
+          }
         </div>
       </div>
     </div>
@@ -412,17 +440,22 @@ const TripSummary = () => {
 
   const handleSubmit = async () => {
     const customerForm = document.forms["customer-form"];
-    const paymentForm = document.forms["payment-form"];
+    const paymentForms = [document.forms["payment-form-0"]];
+    if (document.forms['payment-form-1']) {
+      paymentForms.push(document.forms['payment-form-1']);
+    }
     const passengerForms = passengers.map(p => document.forms[p.formId]);
     if (!customerForm.checkValidity()) {
       setCustomerValidated(true);
       customerForm.reportValidity();
       return;
     }
-    if (!paymentForm.checkValidity()) {
-      setPaymentValidated(true);
-      paymentForm.reportValidity();
-      return;
+    for (let i = 0; i < paymentForms.length; i++) {
+      if (!paymentForms[i].checkValidity()) {
+        paymentForms[i].reportValidity();
+        setPaymentValidated(true);
+        return;
+      }
     }
     for (let i = 0; i < passengerForms.length; i++) {
       if (!passengerForms[i].checkValidity()) {
@@ -441,9 +474,12 @@ const TripSummary = () => {
     ["street", "city", "country", "zipcode", "phoneCountryCode", "phone", "emerContactFirstName", "emerContactLastName", "emerContactCountryCode", "emerContactPhone", "memberId"].forEach(key => {
       customer[key] = intField.has(key) ? Number(customerForm[key].value) : customerForm[key].value;
     });
-    const payment = {};
-    ["method", "cardNumber", "cardHolderFirstName", "cardHolderLastName"].forEach(key => {
-      payment[key] = paymentForm[key].value;
+    const cards = paymentForms.map(el => {
+      const payment = {};
+      ["method", "cardNumber", "cardHolderFirstName", "cardHolderLastName"].forEach(key => {
+        payment[key] = el[key].value;
+      });
+      return payment;
     });
     const resp = await fetch("/api/itinerary/checkout", {
       method: "POST",
@@ -451,9 +487,16 @@ const TripSummary = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        customer,
-        payment,
+        customer: {
+          ...customer,
+          member: {
+            memberId: Number(customer.memberId),
+          },
+        },
+        cards,
         cabinClass,
+        flights: trip.map(el => el.flightId),
+        amount: 1798.35, // TODO: price tag
         passengers: passengerForms.map(form => {
           const data = {};
           ["firstName", "middleName", "lastName", "dateOfBirth", "gender", "passportNum", "passportExpireDate", "nationality", "insurancePlan", "mealPlan", "specialRequest"].forEach(key => {

@@ -121,11 +121,11 @@ create table customer
     city                      varchar not null,
     country                   varchar not null,
     zipcode                   varchar not null,
-    phone                     integer not null,
+    phone                     bigint  not null,
     phone_country_code        integer not null,
     emer_contact_fname        varchar not null,
     emer_contact_lname        varchar not null,
-    emer_contact_phone        integer not null,
+    emer_contact_phone        bigint  not null,
     emer_contact_country_code integer not null,
     insurance_plan_id         integer not null
         constraint customer_insurance_plan_fk
@@ -134,7 +134,6 @@ create table customer
     type                      char    not null
         constraint ch_inh_customer
             check (type = ANY (ARRAY ['A'::bpchar, 'C'::bpchar, 'M'::bpchar])),
-    invoice_number            integer,
     member_id                 integer
         constraint customer_member_id_fk
             references member
@@ -142,9 +141,6 @@ create table customer
 
 alter table customer
     owner to postgres;
-
-create unique index customer__idx
-    on customer (invoice_number);
 
 create table agent
 (
@@ -180,11 +176,6 @@ create table invoice
 alter table invoice
     owner to postgres;
 
-alter table customer
-    add constraint customer_invoice_fk
-        foreign key (invoice_number) references invoice
-            on update cascade on delete cascade;
-
 create unique index invoice__idx
     on invoice (customer_id);
 
@@ -196,7 +187,7 @@ create table passenger
     last_name            varchar not null,
     date_of_birth        date    not null,
     gender               char    not null,
-    passport_num         integer not null,
+    passport_num         bigint  not null,
     passport_expire_date date    not null,
     customer_id          integer not null
         constraint passenger_customer_fk
@@ -208,31 +199,6 @@ create table passenger
 );
 
 alter table passenger
-    owner to postgres;
-
-create table payment
-(
-    payment_id        integer not null,
-    payment_date      date    not null,
-    amount            numeric(8, 2)
-        constraint payment_amount_check
-            check (amount > (0)::numeric),
-    method            char
-        constraint payment_method_check
-            check (method = ANY (ARRAY ['D'::bpchar, 'C'::bpchar]))
-    card_number       varchar not null,
-    card_holder_fname varchar not null,
-    card_holder_lname varchar not null,
-    expire_date       date    not null,
-    invoice_number    integer not null
-        constraint payment_invoice_fk
-            references invoice
-            on update cascade on delete cascade,
-    constraint payment_pk
-        primary key (payment_id, invoice_number)
-);
-
-alter table payment
     owner to postgres;
 
 create table itinerary
