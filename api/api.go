@@ -222,10 +222,26 @@ func ItineraryCheckoutController(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	if err := service.CompleteItineraryTransaction(req); err != nil {
+	switch req.PaymentOption {
+	case 0:
+		req.Cards[0].Amount = req.Amount
+	case 1:
+		req.Cards[0].Amount = req.Amount * 0.5
+		req.Cards[1].Amount = req.Amount - req.Cards[0].Amount
+	case 2:
+		req.Cards[0].Amount = req.Amount * 0.67
+		req.Cards[1].Amount = req.Amount - req.Cards[0].Amount
+	case 3:
+		req.Cards[0].Amount = req.Amount * 0.75
+		req.Cards[1].Amount = req.Amount - req.Cards[0].Amount
+	case 4:
+		req.Cards[0].Amount = req.Amount * 0.80
+		req.Cards[1].Amount = req.Amount - req.Cards[0].Amount
+	}
+	if customerId, err := service.CompleteItineraryTransaction(req); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, err)
 	} else {
-		c.JSON(http.StatusOK, gin.H{"confirmNum": ""})
+		c.JSON(http.StatusOK, gin.H{"confirmNum": customerId})
 	}
 }

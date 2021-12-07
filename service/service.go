@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"math/rand"
@@ -49,6 +50,7 @@ var (
 )
 
 func initDbConnection() *sqlx.DB {
+	rand.Seed(time.Now().UTC().UnixNano())
 	psqlConnStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.DB_HOST, config.DB_PORT, config.DB_USER, config.DB_PWD, config.DB_NAME)
 	db, err := sqlx.Connect("postgres", psqlConnStr)
 	if err != nil {
@@ -360,10 +362,14 @@ func DeleteInsurancePlanById(planId string) (int, error) {
 }
 
 // a customer can use 2 cards to pay for a flight
-func CompleteItineraryTransaction(req *model.PaymentReq) error {
+func CompleteItineraryTransaction(req *model.PaymentReq) (string, error) {
 	currDate := time.Now().Format("2006-01-02")
 	invoiceNumber := rand.Intn(MAX_ID-MIN_ID) + MIN_ID
 	customerId := rand.Intn(MAX_ID-MIN_ID) + MIN_ID
+	memberId := sql.NullInt32{
+		Int32: int32(req.Customer.Member.MemberId),
+		Valid: req.Customer.Member.MemberId != 0,
+	}
 
 	tx := db.MustBegin()
 	tx.MustExec(
@@ -394,7 +400,7 @@ func CompleteItineraryTransaction(req *model.PaymentReq) error {
 		req.Customer.EmergencyContactPhone,
 		req.Customer.EmergencyContactCountryCode,
 		req.Customer.Type,
-		req.Customer.Member.MemberId)
+		memberId)
 	tx.MustExec(
 		`INSERT INTO invoice (
 			invoice_number, 
@@ -413,23 +419,23 @@ func CompleteItineraryTransaction(req *model.PaymentReq) error {
 				payment_date,
 				method,
 				card_number,
-				card_holder_first_name,
-				card_holder_last_name,
+				card_holder_fname,
+				card_holder_lname,
 				expiry_date,
 				invoice_number
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`,
 			rand.Intn(MAX_ID-MIN_ID)+MIN_ID,
 			card.Amount,
-			card.PaymentDate,
+			currDate,
 			card.Method,
 			card.CardNumber,
 			card.CardHolderFirstName,
 			card.CardHolderLastName,
-			card.ExpiryDate,
+			card.ExpiryDate.Date().Format("2006-01-02"),
 			invoiceNumber)
 	}
-	for _, passengerReq := range req.Passengers {
-		passenger := passengerReq.Passenger
+	for _, passenger := range req.Passengers {
+		passenger.PassengerId = rand.Intn(MAX_ID-MIN_ID) + MIN_ID
 		tx.MustExec(
 			`INSERT INTO passenger (
 				passenger_id,
@@ -441,39 +447,41 @@ func CompleteItineraryTransaction(req *model.PaymentReq) error {
 				passport_num,
 				passport_expire_date,
 				nationality,
-				customer_id
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`,
+				customer_id,
+				insurance_plan_id
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`,
 			passenger.PassengerId,
 			passenger.FirstName,
 			passenger.MiddleName,
 			passenger.LastName,
-			passenger.DateOfBirth,
+			passenger.DateOfBirth.Date().Format("2006-01-02"),
 			passenger.Gender,
 			passenger.PassportNum,
-			passenger.PassportExpireDate,
+			passenger.PassportExpireDate.Date().Format("2006-01-02"),
 			passenger.Nationality,
 			customerId,
+			passenger.InsurancePlan.PlanId,
 		)
 
-		for _, flight := range req.Flights {
+		for i, flight := range req.Flights {
 			tx.MustExec(
 				`INSERT INTO itinerary (
 					passenger_id,
 					flight_id,
-					customer_id,
 					cabin_class,
 					meal_plan,
-					special_request
+					special_request,
+					seq
 				) VALUES ($1, $2, $3, $4, $5, $6);`,
 				passenger.PassengerId,
 				flight,
-				customerId,
 				req.CabinClass,
-				passengerReq.MealPlan,
-				passengerReq.SpecialRequest,
+				passenger.MealPlan,
+				passenger.SpecialRequest,
+				i,
 			)
 		}
 	}
 	err := tx.Commit()
-	return err
+	return customerId, err
 }

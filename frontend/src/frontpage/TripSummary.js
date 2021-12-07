@@ -285,7 +285,6 @@ const CustomerForm = ({ validated }) => {
               <div className="row mb-3">
                 <div className="col-12">
                   <Form.Control
-                    required
                     type="text"
                     className="form-control form-control-sm"
                     placeholder="Member ID (ex: 646233847)"
@@ -301,8 +300,7 @@ const CustomerForm = ({ validated }) => {
   );
 };
 
-const PaymentForm = ({ validated }) => {
-  const [paymentOption, setPaymentOption] = useState("0");
+const PaymentForm = ({ validated, paymentOption, setPaymentOption }) => {
   return (
     <div className="row mb-3">
       <div className="col-12 col-md-8">
@@ -333,9 +331,9 @@ const PaymentForm = ({ validated }) => {
               return (
                 <Form key={idx} name={`payment-form-${idx}`} validated={validated} noValidate className={ !idx ? 'mb-3' : '' }>
                   <Form.Group>
-                    <label style={{ fontSize: '0.8rem' }}>Card {idx + 1}</label>
                     <div className="row mb-3">
-                      <div className="col-4">
+                      <div className="col-3">
+                        <label style={{ fontSize: '0.8rem' }}>Card {idx + 1}</label>
                         <Form.Select
                           required
                           className="form-select form-select-sm"
@@ -345,7 +343,18 @@ const PaymentForm = ({ validated }) => {
                           <option value="D">Debit Card</option>
                         </Form.Select>
                       </div>
-                      <div className="col-8">
+                      <div className="col-3">
+                        <label style={{ fontSize: '0.8rem' }}>Expiry Date</label>
+                        <Form.Control
+                          required
+                          type="date"
+                          className="form-control form-control-sm"
+                          placeholder="Expiration Date"
+                          name="expiryDate"
+                        />
+                      </div>
+                      <div className="col-6">
+                        <label style={{ fontSize: '0.8rem' }}>Card Number</label>
                         <Form.Control
                           required
                           type="text"
@@ -399,6 +408,7 @@ const TripSummary = () => {
   const [passengers, setPassengers] = useState([]);
   const [customerValidated, setCustomerValidated] = useState(false);
   const [paymentValidated, setPaymentValidated] = useState(false);
+  const [paymentOption, setPaymentOption] = useState("0");
 
   const getMealPlans = useCallback(async () => {
     const plans = await fetch("/api/meal-plan").then(r => r.json());
@@ -470,13 +480,14 @@ const TripSummary = () => {
       }
     }
     const customer = {};
-    const intField = new Set(["phone", "phoneCountryCode", "emerContactCountryCode", "emerContactPhone", "passportNum"]);
+    const intField = new Set(["phone", "phoneCountryCode", "emerContactCountryCode", "emerContactPhone", "passportNum", "insurancePlan"]);
     ["street", "city", "country", "zipcode", "phoneCountryCode", "phone", "emerContactFirstName", "emerContactLastName", "emerContactCountryCode", "emerContactPhone", "memberId"].forEach(key => {
       customer[key] = intField.has(key) ? Number(customerForm[key].value) : customerForm[key].value;
     });
+    customer.type = 'D';
     const cards = paymentForms.map(el => {
       const payment = {};
-      ["method", "cardNumber", "cardHolderFirstName", "cardHolderLastName"].forEach(key => {
+      ["method", "cardNumber", "expiryDate", "cardHolderFirstName", "cardHolderLastName"].forEach(key => {
         payment[key] = el[key].value;
       });
       return payment;
@@ -494,13 +505,21 @@ const TripSummary = () => {
           },
         },
         cards,
+        paymentOption: Number(paymentOption),
         cabinClass,
         flights: trip.map(el => el.flightId),
         amount: 1798.35, // TODO: price tag
         passengers: passengerForms.map(form => {
           const data = {};
           ["firstName", "middleName", "lastName", "dateOfBirth", "gender", "passportNum", "passportExpireDate", "nationality", "insurancePlan", "mealPlan", "specialRequest"].forEach(key => {
-            data[key] = intField.has(key) ? Number(form.elements[key].value) : form.elements[key].value;
+            const val = intField.has(key) ? Number(form.elements[key].value) : form.elements[key].value;
+            if (key === "insurancePlan") {
+              data[key] = {
+                planId: val
+              };
+            } else {
+              data[key] = val;
+            }
           });
           return data;
         }),
@@ -577,7 +596,11 @@ const TripSummary = () => {
         </div>
       </div>
       <CustomerForm validated={customerValidated} />
-      <PaymentForm validated={paymentValidated} />
+      <PaymentForm
+        paymentOption={paymentOption}
+        setPaymentOption={setPaymentOption}
+        validated={paymentValidated}
+      />
       {
         passengers.map((_, index) => (
           <PassengerForm
