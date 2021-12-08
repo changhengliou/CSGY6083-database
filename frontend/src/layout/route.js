@@ -14,7 +14,7 @@ const Flight = lazy(() => import('../frontpage/Flight'));
 const Airport = lazy(() => import('../frontpage/Airport'));
 const TripSummary = lazy(() => import('../frontpage/TripSummary'));
 const InsurancePlan = lazy(() => import('../frontpage/InsurancePlan'));
-const MealPlan = lazy(() => import('../frontpage/MealPlan'));
+const Membership = lazy(() => import('../frontpage/Membership'));
 const Customer = lazy(() => import('../frontpage/Customer'));
 const Confirm = lazy(() => import('../frontpage/Confirm'));
 
@@ -42,6 +42,14 @@ const routes = [
     )
   },
   {
+    route: '/trip/:customerId',
+    element: (
+      <Suspense fallback={<Loading/>}>
+        <Confirm />
+      </Suspense>
+    )
+  },
+  {
     route: '/flight',
     label: 'FLIGHT STATUS',
     icon: <ClipboardSvg />,
@@ -52,12 +60,6 @@ const routes = [
       </Suspense>
     )
   },
-  // {
-  //   route: '/member',
-  //   label: 'MEMBERSHIP',
-  //   icon: <UserGroupSvg />,
-  //   header: true
-  // },
   {
     route: '/flight-search/result',
     element: (
@@ -135,15 +137,15 @@ const routes = [
           </Suspense>
         )
       },
-      // { 
-      //   route: '/admin/meal', 
-      //   label: 'Meal Plan', 
-      //   element: (
-      //     <Suspense fallback={<Loading/>}>
-      //       <MealPlan />
-      //     </Suspense>
-      //   )
-      // },
+      { 
+        route: '/admin/membership', 
+        label: 'Membership', 
+        element: (
+          <Suspense fallback={<Loading/>}>
+            <Membership />
+          </Suspense>
+        )
+      },
     ]
   }
 ];

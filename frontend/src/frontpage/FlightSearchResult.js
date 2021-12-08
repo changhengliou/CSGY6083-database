@@ -68,7 +68,7 @@ const FlightDetails = ({ flight }) => {
                     <span>{ f.arrivalAirport }</span>
                   </div>
                   <div className="d-flex flex-column text-start col justify-content-between" style={{ fontSize: '0.8rem' }}>
-                    <span>Operated by American Airline</span>
+                    <span>Operated by { f.airlineName }</span>
                     <div>
                       <div className="fw-bold">Meal Services</div>
                       <div>Snacks, Drinks, Food for Purchase, Snacks</div>

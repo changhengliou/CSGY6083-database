@@ -1,16 +1,19 @@
 import { useEffect, useCallback, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import Loading from '../icons/loading';
 
 const Confirm = () => {
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  const pathParams = useParams();
   const navigate = useNavigate();
+  const customerId = searchParams.get('confirm') || pathParams.customerId;
 
   const fetchInfo = useCallback(async () => {
     try {
-      const resp = await fetch(`/api/itinerary/confirm/${searchParams.get('confirm')}`).then(r => r.json());
+      console.log(customerId);
+      const resp = await fetch(`/api/itinerary/confirm/${customerId}`).then(r => r.json());
       setInfo(resp);
     } catch (e) {
       console.error(e);
@@ -29,7 +32,7 @@ const Confirm = () => {
   }
 
   const summary = {};
-  if (info.length) {
+  if (info && info.length) {
     const data = {};
     info.forEach(el => {
       const name = `${el.gender === 'M' ? 'Mr.' : 'Mrs.'} ${el.firstName} ${el.lastName}`;
@@ -63,15 +66,27 @@ const Confirm = () => {
     >
       <div className="text-center">
         {
-          !info.length ? <h4>Oops, itinerary not found.</h4> : (
-            <div>
-              <h4>
-                Congratulations, { info[0].lastName }! You have successfully booked your trip.
-              </h4>
-              <h5>
-                Your confirmation number is: <span className="fw-bolder text-primary">{ searchParams.get('confirm') }</span>
-              </h5>
-            </div>
+          !info || !info.length ? (
+              <div>
+                <h4>
+                  Sorry, we are not able to find this itinerary.
+                </h4>
+                <h6 className="fw-normal">
+                  Make sure that the confirmation number you entered 
+                  <span className="text-primary fw-bold"> ({ customerId })</span> is correct.
+                </h6>
+              </div>
+            ) : (
+            window.location.pathname.startsWith("/trip") ? null : (
+              <div>
+                <h4>
+                  Congratulations, { info[0].lastName }! You have successfully booked your trip.
+                </h4>
+                <h5>
+                  Your confirmation number is: <span className="fw-bolder text-primary">{ searchParams.get('confirm') }</span>
+                </h5>
+              </div>
+            )
           )
         }
       </div>
@@ -127,7 +142,7 @@ const Confirm = () => {
         }
       </div>
       <div className="d-flex justify-content-center mt-3">
-        <button className="btn btn-primary" onClick={() => { navigate("/") }}>
+        <button className="btn btn-outline-primary" onClick={() => { navigate("/") }}>
           Book Another Trip
         </button>
       </div>

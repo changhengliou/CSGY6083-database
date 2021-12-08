@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sort"
 	"strings"
 	"time"
 
@@ -120,52 +121,70 @@ func DeleteAirportById(code string) (int, error) {
 	return int(rows), err
 }
 
-func getRouteHelper(from, to string, stops int, curr *model.Flight, currRoute []*model.Flight, routes *[][]*model.Flight, visited map[string]bool, flightGraph *map[string][]*model.Flight) {
-	currRoute = append(currRoute, curr)
-	visited[curr.DepartureAirport] = true
-	if to == curr.ArrivalAirport {
-		*routes = append(*routes, currRoute)
-		return
+func GetAvailableFlights(from, to string, stops int) ([][]*model.FlightSearchRow, error) {
+	var rows []*model.FlightSearchRow
+	const QUERY = `
+	SELECT
+		f.flight_id,
+		f.departure_airport,
+		f.arrival_airport,
+		f.departure_time,
+		f.arrival_time,
+		a.name AS airline_name,
+		ARRAY_TO_STRING(p.flights, ',') AS routes
+	FROM flight AS f, airline AS a,
+		(WITH RECURSIVE search_graph(departure, arrival, dep_time, arr_time, depth, flights, path, cycle) AS (
+			SELECT f.departure_airport,
+				f.arrival_airport,
+				f.departure_time,
+				f.arrival_time,
+				1,
+				ARRAY [f.flight_id]::varchar[],
+				ARRAY [f.departure_airport, f.arrival_airport]::varchar[],
+				false
+			FROM flight AS f
+			WHERE f.departure_airport = $1
+			UNION ALL
+			SELECT curr.departure_airport,
+				curr.arrival_airport,
+				curr.departure_time,
+				curr.arrival_time,
+				prev.depth + 1,
+				prev.flights || curr.flight_id,
+				path || curr.arrival_airport,
+				curr.arrival_airport = ANY (path)
+			FROM flight curr,
+				search_graph prev
+			WHERE prev.arrival = curr.departure_airport
+				AND NOT cycle
+				AND prev.depth <= $3
+		)
+		SELECT flights
+		FROM search_graph
+		WHERE arrival = $2) AS p
+	WHERE f.flight_id = ANY(p.flights) AND f.airline_id = a.airline_id;`
+	log.Println(QUERY)
+	if err := db.Select(&rows, QUERY, from, to, stops); err != nil {
+		return nil, err
 	}
-	if stops <= 1 {
-		return
+	log.Println(rows)
+	flights := make(map[string][]*model.FlightSearchRow)
+	for _, row := range rows {
+		flights[row.Routes] = append(flights[row.Routes], row)
 	}
-	for _, next := range (*flightGraph)[curr.ArrivalAirport] {
-		if _, ok := visited[next.ArrivalAirport]; !ok {
-			visited[next.ArrivalAirport] = true
-			getRouteHelper(from, to, stops-1, next, currRoute, routes, visited, flightGraph)
-			visited[next.ArrivalAirport] = false
-		}
-	}
-}
 
-func GetAvailableFlights(from, to string, stops int) [][]*model.Flight {
-	var flightList []*model.Flight
-	if err := db.Select(&flightList, "SELECT flight_id, departure_airport, arrival_airport, departure_time, arrival_time FROM flight"); err != nil {
-		log.Fatalln(err)
-	}
-	// build graph
-	flightGraph := make(map[string][]*model.Flight)
-	startingRoutes := make([]*model.Flight, 0)
-	for _, flight := range flightList {
-		if _, ok := flightGraph[flight.DepartureAirport]; !ok {
-			flightGraph[flight.DepartureAirport] = make([]*model.Flight, 0)
+	result := make([][]*model.FlightSearchRow, 0)
+	for key, routes := range flights {
+		routesOrder := make(map[string]int)
+		for i, route := range strings.Split(key, ",") {
+			routesOrder[route] = i
 		}
-
-		flightGraph[flight.DepartureAirport] = append(flightGraph[flight.DepartureAirport], flight)
-		if flight.DepartureAirport == from {
-			startingRoutes = append(startingRoutes, flight)
-		}
+		sort.SliceStable(routes, func(i, j int) bool {
+			return routesOrder[routes[i].FlightId] < routesOrder[routes[j].FlightId]
+		})
+		result = append(result, routes)
 	}
-
-	// find all paths
-	ans := make([][]*model.Flight, 0)
-	for _, fromFlight := range startingRoutes {
-		visited := make(map[string]bool)
-		visited[from] = true
-		getRouteHelper(from, to, stops, fromFlight, []*model.Flight{}, &ans, visited, &flightGraph)
-	}
-	return ans
+	return result, nil
 }
 
 func GetAirlineList() []*model.Airline {
@@ -525,23 +544,32 @@ func GetItineraryByCustomerId(customerId int) ([]*model.ConfirmResult, error) {
 	return itineraries, nil
 }
 
-func GetFlightStatus(req *model.FlightStatusReq) ([]*model.Flight, error) {
+func GetFlightStatus(req *model.FlightStatusReq) ([]*model.FlightStatusRow, error) {
 	query := `
 	SELECT
-	  flight_id,
-		departure_airport,
-		arrival_airport,
-		departure_time,
-		arrival_time,
-		a.airline_id AS "airline.airline_id",
-		a.name AS "airline.name"
-	FROM flight AS f, airline AS a
-	WHERE f.airline_id = a.airline_id`
+		f.flight_id,
+		air.name AS "airline.name",
+		f.departure_airport,
+		f.arrival_airport,
+		f.departure_time,
+		f.arrival_time,
+		dep.country AS dep_country,
+		dep.city AS dep_city,
+		arr.country AS arr_country,
+		arr.city AS arr_city
+	FROM flight AS f
+	INNER JOIN airport AS dep on dep.code = f.departure_airport
+	INNER JOIN airport AS arr on arr.code = f.arrival_airport
+	INNER JOIN airline AS air on air.airline_id = f.airline_id`
 	args := make([]interface{}, 0)
 	q := []string{}
-	if req.Airport != "" {
-		args = append(args, req.Airport)
+	if req.DepartureAirport != "" {
+		args = append(args, req.DepartureAirport)
 		q = append(q, fmt.Sprintf("f.departure_airport=$%d", len(args)))
+	}
+	if req.ArrivalAirport != "" {
+		args = append(args, req.ArrivalAirport)
+		q = append(q, fmt.Sprintf("f.arrival_airport=$%d", len(args)))
 	}
 	if req.AirlineId != 0 {
 		args = append(args, req.AirlineId)
@@ -552,13 +580,14 @@ func GetFlightStatus(req *model.FlightStatusReq) ([]*model.Flight, error) {
 		q = append(q, fmt.Sprintf("f.flight_id=$%d", len(args)))
 	}
 	if len(q) > 0 {
-		query += " AND "
+		query += " WHERE "
 	}
 	args = append(args, req.PageSize)
 	args = append(args, req.Page*req.PageSize)
 	query += strings.Join(q, " AND ")
 	query += fmt.Sprintf(` ORDER BY departure_time ASC LIMIT $%d OFFSET $%d;`, len(args)-1, len(args))
-	var flights []*model.Flight
+
+	var flights []*model.FlightStatusRow
 	err := db.Select(&flights, query, args...)
 	return flights, err
 }

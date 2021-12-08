@@ -20,7 +20,7 @@ const Table = ({ className, columns, data, rowKey, ...props }) => {
         {
           !data || !data.length ? (
             <tr className="p-3">
-              <td colSpan={(columns || []).length} className="text-center">No data</td>
+              <td colSpan={(columns || []).length} className="text-center align-middle">No data</td>
             </tr>
           ) : (
             (data || []).map((row, index) => {

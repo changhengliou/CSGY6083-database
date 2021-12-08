@@ -90,6 +90,15 @@ type Flight struct {
 	Airline          *Airline  `json:"airline" db:"airline" binding:"-"`
 }
 
+type FlightStatusRow struct {
+	Flight
+	Count            int    `json:"count"`
+	DepartureCountry string `json:"departureCountry" db:"dep_country"`
+	ArrivalCountry   string `json:"arrivalCountry" db:"arr_country"`
+	DepartureCity    string `json:"departureCity" db:"dep_city"`
+	ArrivalCity      string `json:"arrivalCity" db:"arr_city"`
+}
+
 type FlightSearchReq struct {
 	Departure string `form:"dep" json:"departure" binding:"required,len=3"`
 	Arrival   string `form:"arr" json:"arrival" binding:"required,len=3"`
@@ -205,9 +214,16 @@ type ConfirmResult struct {
 }
 
 type FlightStatusReq struct {
-	AirlineId int    `form:"airlineId" binding:"omitempty"`
-	Airport   string `form:"airport" binding:"omitempty"`
-	FlightId  string `form:"flightId" binding:"omitempty"`
-	Page      int    `form:"page" binding:"omitempty"`
-	PageSize  int    `form:"pageSize" binding:"omitempty"`
+	AirlineId        int    `form:"airlineId" binding:"omitempty"`
+	DepartureAirport string `form:"dep" binding:"omitempty"`
+	ArrivalAirport   string `form:"arr" binding:"omitempty"`
+	FlightId         string `form:"flightId" binding:"omitempty"`
+	Page             int    `form:"page" binding:"omitempty"`
+	PageSize         int    `form:"pageSize" binding:"omitempty"`
+}
+
+type FlightSearchRow struct {
+	Flight
+	Routes      string `json:"routes" db:"routes"`
+	AirlineName string `json:"airlineName" db:"airline_name"`
 }

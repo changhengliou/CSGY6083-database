@@ -22,7 +22,13 @@ func GetAvailableFlights(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	c.JSON(http.StatusOK, service.GetAvailableFlights(req.Departure, req.Arrival, req.Stops))
+	arr, err := service.GetAvailableFlights(req.Departure, req.Arrival, req.Stops)
+	if err == nil {
+		c.JSON(http.StatusOK, arr)
+	} else {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+	}
 }
 
 func FlightController(c *gin.Context) {
