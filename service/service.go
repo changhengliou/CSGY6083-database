@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -14,12 +15,12 @@ import (
 	"app/model"
 )
 
-// Q1) Table joins with at least 3 tables in join
-// Q2) Multi-row subquery
-// Q3) Correlated subquery
-// Q4) SET operator query
-// Q5) Query with in line view or WITH clause
-// Q6) TOP-N query
+// [x] Table joins with at least 3 tables in join
+// [ ] Multi-row subquery
+// [ ] Correlated subquery
+// [x] SET operator query (union, intersect, except, union all)
+// [x] Query with in line view or WITH clause
+// [x] TOP-N query
 // For each of above queries use proper column alias, built-in functions,
 // appropriate sorting and submit following three items for each of above
 // queries.
@@ -341,7 +342,7 @@ func UpdateInsurancePlanById(plan *model.InsurancePlan) (int, error) {
 		name = :name,
 		description = :description,
 		cost_per_passenger = :cost_per_passenger
-	WHERE plan_id = :plan_id`
+	WHERE plan_id = :plan_id;`
 	r, err := db.NamedExec(QUERY, map[string]interface{}{
 		"plan_id":            plan.PlanId,
 		"name":               plan.Name,
@@ -362,7 +363,7 @@ func DeleteInsurancePlanById(planId string) (int, error) {
 }
 
 // a customer can use 2 cards to pay for a flight
-func CompleteItineraryTransaction(req *model.PaymentReq) (string, error) {
+func CompleteItineraryTransaction(req *model.PaymentReq) (int, error) {
 	currDate := time.Now().Format("2006-01-02")
 	invoiceNumber := rand.Intn(MAX_ID-MIN_ID) + MIN_ID
 	customerId := rand.Intn(MAX_ID-MIN_ID) + MIN_ID
@@ -471,17 +472,93 @@ func CompleteItineraryTransaction(req *model.PaymentReq) (string, error) {
 					cabin_class,
 					meal_plan,
 					special_request,
-					seq
-				) VALUES ($1, $2, $3, $4, $5, $6);`,
+					seq,
+					date
+				) VALUES ($1, $2, $3, $4, $5, $6, $7);`,
 				passenger.PassengerId,
 				flight,
 				req.CabinClass,
 				passenger.MealPlan,
 				passenger.SpecialRequest,
 				i,
+				flight.Date.Date().Format("2006-01-02"),
 			)
 		}
 	}
 	err := tx.Commit()
 	return customerId, err
+}
+
+func GetItineraryByCustomerId(customerId int) ([]*model.ConfirmResult, error) {
+	const QUERY = `
+	SELECT
+		i.passenger_id AS "passenger_id",
+		p.first_name AS "first_name",
+		p.last_name AS "last_name",
+		p.gender AS "gender",
+		i.flight_id AS "flight.flight_id",
+		i.date AS "date",
+		f.departure_time AS "flight.departure_time",
+		f.arrival_time AS "flight.arrival_time",
+		f.departure_airport AS "flight.departure_airport",
+		f.arrival_airport AS "flight.arrival_airport",
+		cabin_class,
+		meal_plan,
+		special_request,
+		seq,
+		ip.name AS "insurance_plan.name"
+	FROM
+	  passenger AS p,
+		itinerary AS i,
+		insurance_plan AS ip,
+		flight AS f
+	WHERE 
+		p.passenger_id = i.passenger_id AND 
+		p.insurance_plan_id = ip.plan_id AND 
+		i.flight_id = f.flight_id AND
+		p.customer_id = $1
+	ORDER BY i.passenger_id ASC, seq ASC;`
+	var itineraries []*model.ConfirmResult
+	if err := db.Select(&itineraries, QUERY, customerId); err != nil {
+		return nil, err
+	}
+	return itineraries, nil
+}
+
+func GetFlightStatus(req *model.FlightStatusReq) ([]*model.Flight, error) {
+	query := `
+	SELECT
+	  flight_id,
+		departure_airport,
+		arrival_airport,
+		departure_time,
+		arrival_time,
+		a.airline_id AS "airline.airline_id",
+		a.name AS "airline.name"
+	FROM flight AS f, airline AS a
+	WHERE f.airline_id = a.airline_id`
+	args := make([]interface{}, 0)
+	q := []string{}
+	if req.Airport != "" {
+		args = append(args, req.Airport)
+		q = append(q, fmt.Sprintf("f.departure_airport=$%d", len(args)))
+	}
+	if req.AirlineId != 0 {
+		args = append(args, req.AirlineId)
+		q = append(q, fmt.Sprintf("f.airline_id=$%d", len(args)))
+	}
+	if req.FlightId != "" {
+		args = append(args, req.FlightId)
+		q = append(q, fmt.Sprintf("f.flight_id=$%d", len(args)))
+	}
+	if len(q) > 0 {
+		query += " AND "
+	}
+	args = append(args, req.PageSize)
+	args = append(args, req.Page*req.PageSize)
+	query += strings.Join(q, " AND ")
+	query += fmt.Sprintf(` ORDER BY departure_time ASC LIMIT $%d OFFSET $%d;`, len(args)-1, len(args))
+	var flights []*model.Flight
+	err := db.Select(&flights, query, args...)
+	return flights, err
 }

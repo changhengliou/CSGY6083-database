@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -183,37 +184,40 @@ func InsurancePlanController(c *gin.Context) {
 	}
 }
 
+type KeyValue struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+var specialRequest = []*KeyValue{
+	{"0", "Disability and Mobility Assistance"},
+	{"1", "Travelling with infants"},
+	{"2", "Travelling with animals"},
+	{"3", "Elderly passenger"},
+	{"4", "Medical assistance"},
+}
+
+var mealPlan = []*KeyValue{
+	{"AVML", "Indian Vegetarian Meal"},
+	{"HNML", "Non-vegetarian Hindu Meal"},
+	{"VJML", "Vegetarian Jain Meal"},
+	{"KSML", "Kosher Meal"},
+	{"BLML", "Bland Meal"},
+	{"DBML", "Diabetic Meal"},
+	{"GFML", "Gluten‑Friendly Meal"},
+	{"LFML", "Low‑Fat Meal"},
+	{"LSML", "Low‑Salt Meal"},
+	{"VGML", "Vegan Meal"},
+	{"CHML", "Child Meal"},
+	{"BBML", "Baby Meal"},
+}
+
 func MealPlanController(c *gin.Context) {
-	c.JSON(http.StatusOK, []struct {
-		Id   string `json:"id"`
-		Name string `json:"name"`
-	}{
-		{"AVML", "Indian Vegetarian Meal"},
-		{"HNML", "Non-vegetarian Hindu Meal"},
-		{"VJML", "Vegetarian Jain Meal"},
-		{"KSML", "Kosher Meal"},
-		{"BLML", "Bland Meal"},
-		{"DBML", "Diabetic Meal"},
-		{"GFML", "Gluten‑Friendly Meal"},
-		{"LFML", "Low‑Fat Meal"},
-		{"LSML", "Low‑Salt Meal"},
-		{"VGML", "Vegan Meal"},
-		{"CHML", "Child Meal"},
-		{"BBML", "Baby Meal"},
-	})
+	c.JSON(http.StatusOK, mealPlan)
 }
 
 func SpecialRequestController(c *gin.Context) {
-	c.JSON(http.StatusOK, []struct {
-		Id   string `json:"id"`
-		Name string `json:"name"`
-	}{
-		{"0", "Disability and Mobility Assistance"},
-		{"1", "Travelling with infants"},
-		{"2", "Travelling with animals"},
-		{"3", "Elderly passenger"},
-		{"4", "Medical assistance"},
-	})
+	c.JSON(http.StatusOK, specialRequest)
 }
 
 func ItineraryCheckoutController(c *gin.Context) {
@@ -243,5 +247,52 @@ func ItineraryCheckoutController(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 	} else {
 		c.JSON(http.StatusOK, gin.H{"confirmNum": customerId})
+	}
+}
+
+func ItineraryConfirmController(c *gin.Context) {
+	idStr := c.Param("customerId")
+	if len(idStr) == 0 {
+		c.JSON(http.StatusBadRequest, "customerId is required")
+		return
+	}
+	customerId, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	if itinerary, err := service.GetItineraryByCustomerId(customerId); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+	} else {
+		for _, row := range itinerary {
+			sp, _ := strconv.Atoi(row.SpecialRequest)
+			row.SpecialRequest = specialRequest[sp].Name
+
+			for _, val := range mealPlan {
+				if val.Id == row.MealPlan {
+					row.MealPlan = val.Name
+					break
+				}
+			}
+		}
+		c.JSON(http.StatusOK, itinerary)
+	}
+}
+
+func FlightStatusController(c *gin.Context) {
+	req := model.FlightStatusReq{}
+	if err := c.BindQuery(&req); err != nil {
+		log.Println(err)
+		return
+	}
+	if req.PageSize == 0 {
+		req.PageSize = 10
+	}
+	if flightStatus, err := service.GetFlightStatus(&req); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+	} else {
+		c.JSON(http.StatusOK, flightStatus)
 	}
 }

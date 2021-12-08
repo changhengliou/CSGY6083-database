@@ -154,7 +154,8 @@ type Itinerary struct {
 	CabinClass     string     `json:"cabinClass" db:"cabin_class" binding:"required"`
 	MealPlan       string     `json:"mealPlan" db:"meal_plan" binding:"required"`
 	SpecialRequest string     `json:"specialRequest" db:"special_request" binding:"required,len=1"`
-	Seq            int        `json:"order" db:"seq" binding:"required"`
+	Seq            int        `json:"seq" db:"seq" binding:"required"`
+	Date           *DateOnly  `json:"date" db:"date" binding:"required"`
 }
 
 type Agent struct {
@@ -177,9 +178,14 @@ type Payment struct {
 }
 
 type PassengerReq struct {
-	MealPlan       string `json:"mealPlan" binding:"omitEmpty"`
-	SpecialRequest string `json:"specialRequest" binding:"omitEmpty"`
+	MealPlan       string `json:"mealPlan" binding:"omitempty"`
+	SpecialRequest string `json:"specialRequest" binding:"omitempty"`
 	Passenger
+}
+
+type FlightReq struct {
+	FlightId string    `json:"flightId" binding:"required"`
+	Date     *DateOnly `json:"date" binding:"required"`
 }
 
 type PaymentReq struct {
@@ -187,7 +193,21 @@ type PaymentReq struct {
 	Passengers    []*PassengerReq `json:"passengers" db:"passenger" binding:"-"`
 	Cards         []*Payment      `json:"cards" db:"payment" binding:"-"`
 	CabinClass    string          `json:"cabinClass" db:"cabin_class" binding:"required"`
-	Flights       []string        `json:"flights" binding:"required"`
+	Flights       []*FlightReq    `json:"flights" binding:"required"`
 	Amount        float64         `json:"amount" binding:"required"`
 	PaymentOption int             `json:"paymentOption" binding:"-"`
+}
+
+type ConfirmResult struct {
+	Passenger
+	Itinerary
+	InsurancePlan
+}
+
+type FlightStatusReq struct {
+	AirlineId int    `form:"airlineId" binding:"omitempty"`
+	Airport   string `form:"airport" binding:"omitempty"`
+	FlightId  string `form:"flightId" binding:"omitempty"`
+	Page      int    `form:"page" binding:"omitempty"`
+	PageSize  int    `form:"pageSize" binding:"omitempty"`
 }

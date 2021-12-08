@@ -492,6 +492,19 @@ const TripSummary = () => {
       });
       return payment;
     });
+    const flights = [];
+    const currDate = moment(searchDate, "YYYY-MM-DD");
+    trip.forEach((f, i) => {
+      if (i !== 0) {
+        const curr = moment(f[i].departureTime, "HH:mm");
+        const prev = moment(f[i - 1].arrivalTime, "HH:mm");
+        if (curr.isBefore(prev)) {
+          currDate.add(1, "days");
+        }
+      }
+      flights.push({ flightId: f[i].flightId, date: currDate.format("YYYY-MM-DD") });
+    });
+    trip.map(el => ({ flightId: el.flightId, date:  new moment(searchDate, "YYYY-MM-DD") }));
     const resp = await fetch("/api/itinerary/checkout", {
       method: "POST",
       headers: {
@@ -507,7 +520,7 @@ const TripSummary = () => {
         cards,
         paymentOption: Number(paymentOption),
         cabinClass,
-        flights: trip.map(el => el.flightId),
+        flights: trip.map(el => ({ flightId: el.flightId, date: searchDate })),
         amount: 1798.35, // TODO: price tag
         passengers: passengerForms.map(form => {
           const data = {};
@@ -526,7 +539,8 @@ const TripSummary = () => {
       }),
     });
     if (resp.ok) {
-      navigate("/itinerary/summary");
+      const data = await resp.json();
+      navigate(`/itinerary/confirm?confirm=${data.confirmNum}`);
     } else {
       alert(`Error: ${resp.status}`);
     }

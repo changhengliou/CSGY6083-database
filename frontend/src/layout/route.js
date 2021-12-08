@@ -16,6 +16,7 @@ const TripSummary = lazy(() => import('../frontpage/TripSummary'));
 const InsurancePlan = lazy(() => import('../frontpage/InsurancePlan'));
 const MealPlan = lazy(() => import('../frontpage/MealPlan'));
 const Customer = lazy(() => import('../frontpage/Customer'));
+const Confirm = lazy(() => import('../frontpage/Confirm'));
 
 const routes = [
   {
@@ -70,6 +71,14 @@ const routes = [
     element: (
       <Suspense fallback={<Loading/>}>
         <TripSummary />
+      </Suspense>
+    )
+  },
+  {
+    route: '/itinerary/confirm',
+    element: (
+      <Suspense fallback={<Loading/>}>
+        <Confirm />
       </Suspense>
     )
   },
