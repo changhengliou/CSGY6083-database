@@ -495,7 +495,7 @@ func CompleteItineraryTransaction(req *model.PaymentReq) (int, error) {
 					date
 				) VALUES ($1, $2, $3, $4, $5, $6, $7);`,
 				passenger.PassengerId,
-				flight,
+				flight.FlightId,
 				req.CabinClass,
 				passenger.MealPlan,
 				passenger.SpecialRequest,
@@ -536,6 +536,44 @@ func GetItineraryByCustomerId(customerId int) ([]*model.ConfirmResult, error) {
 		p.insurance_plan_id = ip.plan_id AND 
 		i.flight_id = f.flight_id AND
 		p.customer_id = $1
+	ORDER BY i.passenger_id ASC, seq ASC;`
+	var itineraries []*model.ConfirmResult
+	if err := db.Select(&itineraries, QUERY, customerId); err != nil {
+		return nil, err
+	}
+	return itineraries, nil
+}
+
+func GetItineraryByMemberId(customerId int) ([]*model.ConfirmResult, error) {
+	const QUERY = `
+	SELECT
+		i.passenger_id AS "passenger_id",
+		p.first_name AS "first_name",
+		p.last_name AS "last_name",
+		p.gender AS "gender",
+		i.flight_id AS "flight.flight_id",
+		i.date AS "date",
+		f.departure_time AS "flight.departure_time",
+		f.arrival_time AS "flight.arrival_time",
+		f.departure_airport AS "flight.departure_airport",
+		f.arrival_airport AS "flight.arrival_airport",
+		cabin_class,
+		meal_plan,
+		special_request,
+		seq,
+		ip.name AS "insurance_plan.name"
+	FROM
+	  passenger AS p,
+		itinerary AS i,
+		customer AS c,
+		insurance_plan AS ip,
+		flight AS f
+	WHERE
+	  c.member_id = $1 AND
+		c.customer_id = p.customer_id AND
+		p.passenger_id = i.passenger_id AND 
+		p.insurance_plan_id = ip.plan_id AND 
+		i.flight_id = f.flight_id
 	ORDER BY i.passenger_id ASC, seq ASC;`
 	var itineraries []*model.ConfirmResult
 	if err := db.Select(&itineraries, QUERY, customerId); err != nil {
@@ -590,4 +628,46 @@ func GetFlightStatus(req *model.FlightStatusReq) ([]*model.FlightStatusRow, erro
 	var flights []*model.FlightStatusRow
 	err := db.Select(&flights, query, args...)
 	return flights, err
+}
+
+func GetMembershipsByAirlineId(airlineId int) ([]*model.Membership, error) {
+	var memberships []*model.Membership
+	err := db.Select(&memberships, `SELECT membership_id, membership_name FROM membership WHERE airline_id = $1;`, airlineId)
+	return memberships, err
+}
+
+func GetMembersByMembershipId(membershipId string) ([]*model.Member, error) {
+	var members []*model.Member
+	err := db.Select(&members, `
+		SELECT
+		  member_id,
+			member_start_date,
+			member_end_date,
+			membership_id AS "membership.membership_id" 
+		FROM member WHERE membership_id = $1`, membershipId)
+	return members, err
+}
+
+func CreateMember(member *model.Member) (int, error) {
+	r, err := db.Exec(`
+		INSERT INTO member VALUES ($1, $2, $3, $4);
+	`, member.MemberId,
+		member.MemberStartDate.Date().Format("2006-01-02"),
+		member.MemberEndDate.Date().Format("2006-01-02"),
+		member.Membership.MembershipId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	cnt, err := r.RowsAffected()
+	return int(cnt), err
+}
+
+func DeleteMemberByMemberId(memberId string) (int, error) {
+	r, err := db.Exec("DELETE FROM member WHERE member_id = $1", memberId)
+	if err != nil {
+		return 0, err
+	}
+	cnt, err := r.RowsAffected()
+	return int(cnt), err
 }

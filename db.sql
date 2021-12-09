@@ -96,17 +96,30 @@ create table insurance_plan
 alter table insurance_plan
     owner to postgres;
 
+create table membership
+(
+    membership_id   char(2) not null
+        constraint membership_pk
+            primary key,
+    membership_name varchar not null,
+    airline_id      integer not null
+        constraint membership_airline_fk
+            references airline
+);
+
+alter table membership
+    owner to postgres;
+
 create table member
 (
-    member_id             integer not null
+    member_id         integer not null
         constraint member_pk
             primary key,
-    membership_name       varchar not null,
-    membership_start_date date    not null,
-    membership_end_date   date,
-    airline_id            integer
-        constraint member_airline_fk
-            references airline
+    member_start_date date    not null,
+    member_end_date   date    not null,
+    membership_id     char(2) not null
+        constraint member_membership_id_fk
+            references membership
 );
 
 alter table member
@@ -237,6 +250,7 @@ create table itinerary
     meal_plan       char(4) not null,
     special_request char,
     seq             integer not null,
+    date            date    not null,
     constraint itinerary_pk
         primary key (passenger_id, flight_id)
 );
@@ -244,3 +258,16 @@ create table itinerary
 alter table itinerary
     owner to postgres;
 
+
+insert into membership
+values ('TB', 'TrueBlue', 111111),
+       ('RR', 'Rapid Rewards', 111111),
+       ('MP', 'Mileage Plan', 111111),
+       ('SM', 'SkyMiles', 111111),
+       ('AA', 'AAdvantage', 111111),
+       ('ML', 'MileagePlus', 111111),
+       ('HM', 'HawaiianMiles', 111111),
+       ('BA', 'British Airways Executive Club', 111111),
+       ('AK', 'AirFrance & KLM Flying Blue', 111111),
+       ('VA', 'Virgin Atlantic Flying Club', 111111),
+       ('ES', 'Emirates Skywards', 111111);

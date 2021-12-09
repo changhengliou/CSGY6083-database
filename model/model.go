@@ -112,12 +112,17 @@ type InsurancePlan struct {
 	CostPerPassenger float64 `json:"costPerPassenger" db:"cost_per_passenger" binding:"required"`
 }
 
+type Membership struct {
+	MembershipId   string   `json:"membershipId" db:"membership_id"`
+	MembershipName string   `json:"membershipName" db:"membership_name"`
+	Airline        *Airline `json:"airline" db:"airline" binding:"-"`
+}
+
 type Member struct {
-	MemberId            int       `json:"memberId" db:"member_id"`
-	MembershipName      string    `json:"membershipName" db:"membership_name" binding:"required"`
-	MembershipStartDate *DateOnly `json:"membershipStartDate" db:"membership_start_date" binding:"required"`
-	MembershipEndDate   *DateOnly `json:"membershipEndDate" db:"membership_end_date" binding:"required"`
-	Airline             *Airline  `json:"airline" db:"airline" binding:"-"`
+	MemberId        int         `json:"memberId" db:"member_id" binding:"omitempty,len=6"`
+	MemberStartDate *DateOnly   `json:"memberStartDate" db:"member_start_date" binding:"omitempty"`
+	MemberEndDate   *DateOnly   `json:"memberEndDate" db:"member_end_date" binding:"required"`
+	Membership      *Membership `json:"membership" db:"membership" binding:"-"`
 }
 
 type Invoice struct {

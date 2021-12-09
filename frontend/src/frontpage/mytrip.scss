@@ -57,3 +57,20 @@ $select-red: #df1e33;
     color: #fff;
   }
 }
+
+.trip-select {
+  background: transparent;
+  color: #fff;
+  border-width: 0 0 1px 0;
+  border-radius: 0;
+
+  > option {
+    background: #fff;
+    color: #1c1c1c;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}

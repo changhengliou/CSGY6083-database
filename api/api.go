@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -226,6 +227,58 @@ func SpecialRequestController(c *gin.Context) {
 	c.JSON(http.StatusOK, specialRequest)
 }
 
+func MembershipController(c *gin.Context) {
+	airlineId := c.Param("airlineId")
+	aId, err := strconv.Atoi(airlineId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	m, err := service.GetMembershipsByAirlineId(aId)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, err)
+	} else {
+		c.JSON(http.StatusOK, m)
+	}
+}
+
+func MemberController(c *gin.Context) {
+	memberId := c.Param("memberId")
+	var (
+		m   interface{}
+		err error
+	)
+	if c.Request.Method == http.MethodGet {
+		m, err = service.GetMembersByMembershipId(memberId)
+	} else if c.Request.Method == http.MethodDelete {
+		m, err = service.DeleteAirlineById(memberId)
+	}
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, m)
+}
+
+func CreateMemberController(c *gin.Context) {
+	var member model.Member
+	if err := c.BindJSON(&member); err != nil {
+		log.Println(err)
+		return
+	}
+	now := model.DateOnly(time.Now())
+	member.MemberId = rand.Intn(MAX_ID-MIN_ID) + MIN_ID
+	member.MemberStartDate = &now
+	if cnt, err := service.CreateMember(&member); cnt != 1 || err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, member)
+}
+
 func ItineraryCheckoutController(c *gin.Context) {
 	var req *model.PaymentReq
 	if err := c.BindJSON(&req); err != nil {
@@ -253,6 +306,36 @@ func ItineraryCheckoutController(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 	} else {
 		c.JSON(http.StatusOK, gin.H{"confirmNum": customerId})
+	}
+}
+
+func MemberItineraryController(c *gin.Context) {
+	idStr := c.Param("memberId")
+	if len(idStr) == 0 {
+		c.JSON(http.StatusBadRequest, "memberId is required")
+		return
+	}
+	customerId, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	if itinerary, err := service.GetItineraryByMemberId(customerId); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+	} else {
+		for _, row := range itinerary {
+			sp, _ := strconv.Atoi(row.SpecialRequest)
+			row.SpecialRequest = specialRequest[sp].Name
+
+			for _, val := range mealPlan {
+				if val.Id == row.MealPlan {
+					row.MealPlan = val.Name
+					break
+				}
+			}
+		}
+		c.JSON(http.StatusOK, itinerary)
 	}
 }
 

@@ -43,6 +43,12 @@ func main() {
 
 		apiController.POST("/itinerary/checkout", api.ItineraryCheckoutController)
 		apiController.GET("/itinerary/confirm/:customerId", api.ItineraryConfirmController)
+		apiController.GET("/itinerary/member/:memberId", api.MemberItineraryController)
+
+		apiController.GET("/membership/:airlineId", api.MembershipController)
+		apiController.GET("/member/:memberId", api.MemberController)
+		apiController.DELETE("/member/:memberId", api.MemberController)
+		apiController.POST("/member", api.CreateMemberController)
 	}
 
 	if err := r.Run(); err != nil {

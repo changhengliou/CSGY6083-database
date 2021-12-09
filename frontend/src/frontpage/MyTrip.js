@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Form } from 'react-bootstrap';
 import { ReactComponent as ArrowSvg } from "../icons/arrow.svg";
 import "./mytrip.scss";
 
@@ -8,46 +8,39 @@ const MyTrip = () => {
   const navigate = useNavigate();
   return (
     <form name="search-form" className="bg-dark text-light row justify-content-center align-items-center px-5 pt-4 pb-5">
-        <div className="row col-11 justify-content-center align-items-end" style={{ maxWidth: '800px' }}>
-          <div className="col-12 col-md-4">
-            <div className="search-bar-hint">Find Your Trip</div>
-            <input
-              className="form-input"
-              type="text"
-              placeholder="Confirmation Number"
-              name="customerId"
-            />
-          </div>
-          <div className="col-12 col-md-4">
-            <input
-              className="form-input"
-              type="text"
-              placeholder="First Name"
-              name="fName"
-            />
-          </div>
+        <div className="row col-10 justify-content-center align-items-end" style={{ maxWidth: '800px' }}>
+        <div className="col-12 col-md-4">
+          <div className="search-bar-hint">Find Your Trip</div>
+          <Form.Select
+            size="sm"
+            className="trip-select"
+            name="option"
+            style={{ width: '200px' }}
+          >
+            <option value="customerId">Confirmation Number</option>
+            <option value="memberId">Member ID</option>
+          </Form.Select>
+        </div>
           <div className="col-12 col-md-4">
             <input
               className="form-input"
               type="text"
-              placeholder="Last Name"
-              name="lName"
+              name="input"
+              style={{ width: '200px' }}
             />
           </div>
         </div>
-      <div className="col-1">
+      <div className="col-2">
         <button
           type="button"
           className="submit-btn d-flex justify-content-center align-items-center"
           onClick={() => {
             const form = document.forms[CURR_FORM];
-            const customerId = form.customerId.value;
-            const fName = form.fName.value;
-            const lName = form.lName.value;
+            const option = form.option.value;
+            const input = form.input.value;
             const params = new URLSearchParams();
-            if (fName) params.append("fName", fName);
-            if (lName) params.append("lName", lName);
-            navigate(`/trip/${customerId}?${params.toString()}`); 
+            params.append(option, input);
+            navigate(`/trip/search?${params.toString()}`); 
           }}
         >
           <ArrowSvg />

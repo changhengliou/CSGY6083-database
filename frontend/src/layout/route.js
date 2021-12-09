@@ -42,7 +42,7 @@ const routes = [
     )
   },
   {
-    route: '/trip/:customerId',
+    route: '/trip/search',
     element: (
       <Suspense fallback={<Loading/>}>
         <Confirm />

@@ -494,16 +494,16 @@ const TripSummary = () => {
     });
     const flights = [];
     const currDate = moment(searchDate, "YYYY-MM-DD");
-    trip.forEach((f, i) => {
+    for (let i = 0; i < trip.length; i++) {
       if (i !== 0) {
-        const curr = moment(f[i].departureTime, "HH:mm");
-        const prev = moment(f[i - 1].arrivalTime, "HH:mm");
+        const curr = moment(trip[i].departureTime, "HH:mm");
+        const prev = moment(trip[i - 1].arrivalTime, "HH:mm");
         if (curr.isBefore(prev)) {
           currDate.add(1, "days");
         }
       }
-      flights.push({ flightId: f[i].flightId, date: currDate.format("YYYY-MM-DD") });
-    });
+      flights.push({ flightId: trip[i].flightId, date: currDate.format("YYYY-MM-DD") });
+    }
     trip.map(el => ({ flightId: el.flightId, date:  new moment(searchDate, "YYYY-MM-DD") }));
     const resp = await fetch("/api/itinerary/checkout", {
       method: "POST",

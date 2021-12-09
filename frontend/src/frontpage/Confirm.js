@@ -8,13 +8,18 @@ const Confirm = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const pathParams = useParams();
   const navigate = useNavigate();
-  const customerId = searchParams.get('confirm') || pathParams.customerId;
+  const customerId = searchParams.get('customerId') || pathParams.customerId;
+  const memberId = searchParams.get('memberId');
 
   const fetchInfo = useCallback(async () => {
     try {
-      console.log(customerId);
-      const resp = await fetch(`/api/itinerary/confirm/${customerId}`).then(r => r.json());
-      setInfo(resp);
+      if (memberId) {
+        const resp = await fetch(`/api/itinerary/member/${memberId}`).then(r => r.json());
+        setInfo(resp);
+      } else {
+        const resp = await fetch(`/api/itinerary/confirm/${customerId}`).then(r => r.json());
+        setInfo(resp);
+      }
     } catch (e) {
       console.error(e);
     } finally {
