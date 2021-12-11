@@ -232,3 +232,11 @@ type FlightSearchRow struct {
 	Routes      string `json:"routes" db:"routes"`
 	AirlineName string `json:"airlineName" db:"airline_name"`
 }
+
+type StatsResp struct {
+	FlyTodayInfo    []string   `json:"flightTodayInfo" db:"flight_today_info"`
+	MostPopInsGreat string     `json:"mostPopInsGreat" db:"name"`
+	MostPopInsSmall string     `json:"mostPopInsSmall" db:"name"`
+	TopMembers      []int      `json:"topMembers"`
+	Invoices        []*Invoice `json:"invoices"`
+}

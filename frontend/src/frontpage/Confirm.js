@@ -77,8 +77,8 @@ const Confirm = () => {
                   Sorry, we are not able to find this itinerary.
                 </h4>
                 <h6 className="fw-normal">
-                  Make sure that the confirmation number you entered 
-                  <span className="text-primary fw-bold"> ({ customerId })</span> is correct.
+                  Make sure that the { customerId ? 'confirmation' : 'member' } number you entered 
+                  <span className="text-primary fw-bold"> ({ customerId || memberId })</span> is correct.
                 </h6>
               </div>
             ) : (

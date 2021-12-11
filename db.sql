@@ -258,16 +258,3 @@ create table itinerary
 alter table itinerary
     owner to postgres;
 
-
-insert into membership
-values ('TB', 'TrueBlue', 111111),
-       ('RR', 'Rapid Rewards', 111111),
-       ('MP', 'Mileage Plan', 111111),
-       ('SM', 'SkyMiles', 111111),
-       ('AA', 'AAdvantage', 111111),
-       ('ML', 'MileagePlus', 111111),
-       ('HM', 'HawaiianMiles', 111111),
-       ('BA', 'British Airways Executive Club', 111111),
-       ('AK', 'AirFrance & KLM Flying Blue', 111111),
-       ('VA', 'Virgin Atlantic Flying Club', 111111),
-       ('ES', 'Emirates Skywards', 111111);

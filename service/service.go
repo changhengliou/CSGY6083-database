@@ -17,7 +17,7 @@ import (
 )
 
 // [x] Table joins with at least 3 tables in join
-// [ ] Multi-row subquery
+// [x] Multi-row subquery
 // [ ] Correlated subquery
 // [x] SET operator query (union, intersect, except, union all)
 // [x] Query with in line view or WITH clause
@@ -670,4 +670,118 @@ func DeleteMemberByMemberId(memberId string) (int, error) {
 	}
 	cnt, err := r.RowsAffected()
 	return int(cnt), err
+}
+
+func GetStats() (*model.StatsResp, error) {
+	// customers who fly today
+	r, err := db.Query(`
+		SELECT CONCAT(
+			CASE WHEN p.gender = 'M' THEN 'Mr.' ELSE 'Mrs.' END,
+			p.first_name,
+			' ',
+			p.last_name,
+			' (',
+			f.departure_airport,
+			'->',
+			f.arrival_airport,
+			')'
+		) AS info
+		FROM itinerary AS i,
+		passenger AS p,
+		flight AS f
+		WHERE i.date = $1
+		AND i.passenger_id = p.passenger_id
+		AND i.flight_id = f.flight_id;
+	`, time.Now().Format("2006-01-02"))
+
+	ans := model.StatsResp{}
+	if err != nil {
+		return &ans, err
+	}
+	for r.Next() {
+		var str string
+		if err := r.Scan(&str); err != nil {
+			return &ans, err
+		}
+		ans.FlyTodayInfo = append(ans.FlyTodayInfo, str)
+	}
+
+	// Most Popular Insurance Plan With Price >= 100
+	r, err = db.Query(`
+		WITH v AS (SELECT COUNT(*) AS cnt, insurance_plan_id
+							FROM passenger AS p
+							WHERE insurance_plan_id IN (
+									SELECT insurance_plan_id FROM insurance_plan WHERE cost_per_passenger >= 100
+							)
+							GROUP BY insurance_plan_id
+							ORDER BY cnt DESC
+							LIMIT 1)
+		SELECT name
+		FROM v,
+		insurance_plan
+		WHERE plan_id = v.insurance_plan_id;
+	`)
+	if err != nil {
+		return &ans, err
+	}
+	if r.Next() {
+		if err := r.Scan(&ans.MostPopInsGreat); err != nil {
+			return &ans, err
+		}
+	}
+
+	// Most Popular Insurance Plan With Price < 100
+	r, err = db.Query(`
+		WITH v AS (SELECT COUNT(*) AS cnt, insurance_plan_id
+							FROM passenger AS p
+							WHERE insurance_plan_id IN (
+									SELECT insurance_plan_id FROM insurance_plan WHERE cost_per_passenger < 100
+							)
+							GROUP BY insurance_plan_id
+							ORDER BY cnt DESC
+							LIMIT 1)
+		SELECT name
+		FROM v,
+		insurance_plan
+		WHERE plan_id = v.insurance_plan_id;
+	`)
+	if err != nil {
+		return &ans, err
+	}
+	if r.Next() {
+		if err := r.Scan(&ans.MostPopInsSmall); err != nil {
+			return &ans, err
+		}
+	}
+
+	// Top 10 Members Who Booked The Most Flights
+	r, err = db.Query(`
+		SELECT m.member_id, COUNT(*) AS cnt
+		FROM member AS m
+		JOIN customer AS c ON m.member_id = c.member_id
+		JOIN passenger AS p on c.customer_id = p.customer_id
+		JOIN itinerary AS i on p.passenger_id = i.passenger_id
+		GROUP BY m.member_id
+		ORDER BY cnt DESC
+		LIMIT 10;
+	`)
+	if err != nil {
+		return &ans, err
+	}
+	for r.Next() {
+		memberId, cnt := 0, 0
+		if err := r.Scan(&memberId, &cnt); err != nil {
+			return &ans, err
+		}
+		ans.TopMembers = append(ans.TopMembers, memberId)
+	}
+
+	// payments
+	var invoices []*model.Invoice
+	err = db.Select(&invoices, "SELECT invoice_number, invoice_date, amount FROM invoice;")
+	if err != nil {
+		return &ans, err
+	}
+	ans.Invoices = invoices
+	return &ans, nil
 }

@@ -49,9 +49,16 @@ func main() {
 		apiController.GET("/member/:memberId", api.MemberController)
 		apiController.DELETE("/member/:memberId", api.MemberController)
 		apiController.POST("/member", api.CreateMemberController)
+
+		apiController.GET("/stats", api.GetStats)
 	}
 
-	if err := r.Run(); err != nil {
+	r.Static("/static", "./frontend/build/static")
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./frontend/build/index.html")
+	})
+
+	if err := r.Run("0.0.0.0:8080"); err != nil {
 		log.Fatal(err)
 	}
 }

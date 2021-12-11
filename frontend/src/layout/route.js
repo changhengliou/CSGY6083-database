@@ -93,8 +93,8 @@ const routes = [
     ),
     children: [
       { 
-        route: '/admin/customer', 
-        label: 'Customer', 
+        route: '/admin/stats', 
+        label: 'Stats', 
         element: (
           <Suspense fallback={<Loading/>}>
             <Customer />

@@ -385,3 +385,13 @@ func FlightStatusController(c *gin.Context) {
 		c.JSON(http.StatusOK, flightStatus)
 	}
 }
+
+func GetStats(c *gin.Context) {
+	info, err := service.GetStats()
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusOK, err)
+		return
+	}
+	c.JSON(http.StatusOK, info)
+}
