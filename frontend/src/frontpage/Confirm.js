@@ -88,7 +88,7 @@ const Confirm = () => {
                   Congratulations, { info[0].lastName }! You have successfully booked your trip.
                 </h4>
                 <h5>
-                  Your confirmation number is: <span className="fw-bolder text-primary">{ searchParams.get('confirm') }</span>
+                  Your confirmation number is: <span className="fw-bolder text-primary">{ customerId }</span>
                 </h5>
               </div>
             )

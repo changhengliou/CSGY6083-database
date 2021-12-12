@@ -2,8 +2,10 @@ import { lazy, Suspense } from 'react';
 import { ReactComponent as DepartureSvg } from '../icons/departure.svg';
 import { ReactComponent as SuitcaseSvg } from '../icons/suitcase.svg';
 import { ReactComponent as ClipboardSvg } from '../icons/clipboard.svg';
-import { ReactComponent as UserGroupSvg } from '../icons/user-group.svg';
 import Loading from '../icons/loading';
+import { RequiredAuth } from '../auth';
+
+const Login = lazy(() => import('../frontpage/Login'));
 const BookFlight = lazy(() => import('../frontpage/BookFlight'));
 const FlightSearchResult = lazy(() => import('../frontpage/FlightSearchResult'));
 const MyTrip = lazy(() => import('../frontpage/MyTrip'));
@@ -85,10 +87,20 @@ const routes = [
     )
   },
   {
+    route: '/admin/login',
+    element: (
+      <Suspense fallback={<Loading/>}>
+        <Login />
+      </Suspense>
+    )
+  },
+  {
     route: '/admin',
     element: (
       <Suspense fallback={<Loading/>}>
-        <Admin />
+        <RequiredAuth>
+          <Admin />
+        </RequiredAuth>
       </Suspense>
     ),
     children: [
