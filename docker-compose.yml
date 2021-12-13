@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  app:
+    image: app
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      PORT: 3000
+      DB_HOST: postgres
+    command: ["./main"]
+    networks:
+      - net
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:14.0-alpine
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: 123456
+    volumes:
+      - ./data:/var/lib/postgresql/data/pgdata
+    networks: 
+      - net
+    ports:
+      - 5432:5432
+    restart: always
+networks:
+  net:
+    driver: bridge

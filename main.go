@@ -58,7 +58,7 @@ func main() {
 		c.File("./frontend/build/index.html")
 	})
 
-	if err := r.Run("0.0.0.0:8080"); err != nil {
+	if err := r.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

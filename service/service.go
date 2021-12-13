@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -52,6 +53,10 @@ var (
 )
 
 func initDbConnection() *sqlx.DB {
+	host := os.Getenv("DB_HOST")
+	if host != "" {
+		config.DB_HOST = host
+	}
 	rand.Seed(time.Now().UTC().UnixNano())
 	psqlConnStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.DB_HOST, config.DB_PORT, config.DB_USER, config.DB_PWD, config.DB_NAME)
 	db, err := sqlx.Connect("postgres", psqlConnStr)
