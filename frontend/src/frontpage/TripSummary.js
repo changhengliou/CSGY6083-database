@@ -540,7 +540,7 @@ const TripSummary = () => {
     });
     if (resp.ok) {
       const data = await resp.json();
-      navigate(`/itinerary/confirm?confirm=${data.confirmNum}`);
+      navigate(`/itinerary/confirm?customerId=${data.confirmNum}`);
     } else {
       alert(`Error: ${resp.status}`);
     }

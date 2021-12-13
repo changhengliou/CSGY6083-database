@@ -691,7 +691,8 @@ func GetStats() (*model.StatsResp, error) {
 		flight AS f
 		WHERE i.date = $1
 		AND i.passenger_id = p.passenger_id
-		AND i.flight_id = f.flight_id;
+		AND i.flight_id = f.flight_id
+		LIMIT 10;
 	`, time.Now().Format("2006-01-02"))
 
 	ans := model.StatsResp{}
@@ -711,7 +712,7 @@ func GetStats() (*model.StatsResp, error) {
 		WITH v AS (SELECT COUNT(*) AS cnt, insurance_plan_id
 							FROM passenger AS p
 							WHERE insurance_plan_id IN (
-									SELECT insurance_plan_id FROM insurance_plan WHERE cost_per_passenger >= 100
+									SELECT plan_id FROM insurance_plan WHERE cost_per_passenger >= 100
 							)
 							GROUP BY insurance_plan_id
 							ORDER BY cnt DESC
@@ -735,7 +736,7 @@ func GetStats() (*model.StatsResp, error) {
 		WITH v AS (SELECT COUNT(*) AS cnt, insurance_plan_id
 							FROM passenger AS p
 							WHERE insurance_plan_id IN (
-									SELECT insurance_plan_id FROM insurance_plan WHERE cost_per_passenger < 100
+									SELECT plan_id FROM insurance_plan WHERE cost_per_passenger < 100
 							)
 							GROUP BY insurance_plan_id
 							ORDER BY cnt DESC
