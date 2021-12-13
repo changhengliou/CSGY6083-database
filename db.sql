@@ -67,20 +67,6 @@ create table flight
 alter table flight
     owner to postgres;
 
-create table airport_flight
-(
-    airport_code char(3) not null
-        constraint airport_flight_airport_fk
-            references airport
-            on update cascade on delete cascade,
-    flight_id    varchar not null
-        constraint airport_flight_flight_fk
-            references flight
-);
-
-alter table airport_flight
-    owner to postgres;
-
 create table insurance_plan
 (
     plan_id            integer not null
@@ -161,7 +147,7 @@ create table agent
             on update cascade on delete cascade,
     agent_name  varchar not null,
     web_address varchar not null,
-    phone       integer not null
+    phone       bigint  not null
 );
 
 alter table agent

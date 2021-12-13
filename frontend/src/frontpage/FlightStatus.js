@@ -66,6 +66,12 @@ const FlightStatus = () => {
   };
 
   useEffect(() => {
+    (async () => {
+      await fetchFlightStatus();
+    })();
+  }, [page]);
+
+  useEffect(() => {
     getAirlines();
     getAirports();
     outboundRef.current.checked = true;
